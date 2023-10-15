@@ -13,12 +13,1057 @@ execute:
 editor: visual
 ---
 
-# Outline
+## Installing packages
 
-# Installing packages
+```{r}
+#| label: loading-packages
+#| include: true
+#| eval: true
+#| message: false
+#| cache: false
 
-# Loading data
+# Function to install and load packages
+install_and_load_packages <- function(packages) {
+  for (package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package)
+      require(package, character.only = TRUE)
+    }
+  }
+}
 
-# EDA
+install_and_load_packages(c(
+  "tidyverse", "reactable", "DT", "skimr", "gt", "gtExtras", "styler", "kableExtra", "forecast", "bootstrap", "zoo",
+  "Hmisc", "ROCR", "gridExtra", "pander", "reshape2", "lazyeval", "moments", "entropy", "corrplot"
+))
 
-# Conclusions
+# install.packages("https://cran.r-project.org/src/contrib/Archive/funModeling/funModeling_1.9.4.tar.gz", repos = NULL, type = "source")
+library(funModeling)
+
+rm(install_and_load_packages)
+```
+
+## Loading data
+
+```{r}
+#| label: reading-csv
+#| include: true
+#| cache: true
+#| warning: false	
+
+data <- read_csv("beer_reviews.csv")
+# data %>% spec()
+```
+
+We have an almost 200mb file with over 1kk observations. This fits working memory as it is, so no need to use DT or paralellisation.
+
+## EDA
+
+My **goal** is to gradually develop an understanding of my data. I'll approach it by doing cycles of asking questions, trying to answer them and generating a new questions along the way.\
+The key here is to **find good questions to ask**, which I know I don't know so far. So it will be a creative process of searching and utilizing a help of a frameworks, so I can be sure to not get lost in the process.
+
+My usual framework is to cover at least a basic questions and investigate some anomalies I'm noticing along the way.
+
+### Step 1 - Checking data health
+
+At this stage, I have 2 general questions:
+
+1.  What this data is about?
+2.  Is the data good enough to be used?
+
+```{r}
+#| label: health-check
+#| column: page
+#| warning: false
+#| cache: true
+
+data |>
+  status() |>
+  select(-c(contains("inf"))) |>
+  bind_cols(
+    data |> head(20) |> t() |> as_tibble() |>
+      unite("glimpse", 1:20, sep = ", ", remove = T, na.rm = T) |>
+      mutate(glimpse = str_trunc(glimpse, width = 29, ))
+  ) |>
+  mutate_if(is.numeric, ~ round(., 4)) |>
+  remove_rownames() |>
+  reactable::reactable(
+    resizable = T,
+    wrap = F,
+    bordered = F,
+    defaultPageSize = 50,
+    height = 500
+  )
+```
+
+#### **1. Variables**
+
+Get a first glimpse of the data, to form a basic understanding of variables.\
+Lets group and describe variables:\
+\
+So this data is about
+
+-   5k+ breweries\
+    brewery_id - !fix to char\
+    brewery_name - **There is 5k+ different breweries**, !fix NA
+
+-   Their beer\
+    beer_style - **And 100+ different types of beer**\
+    beer_name - **With 50k+ trademarks**\
+    beer_beerid -!fix to char\
+    beer_abv - alcohol by volume, the higher, the more alcoholic the drink, !fix NA 4%
+
+-   And user reviews\
+    review_profilename - userid, **Scored by 33k users**, !fix NA\
+    review_time - !fix to posix\
+    review_overall - !fix zeros, seems like a bug from a single user, **In 4 categories + weighted main score**\
+    review_aroma\
+    review_appearance - !fix zeros\
+    review_palate - the way it feels going down (carbonation, mouthfeel, alcohol profile and texture)\
+    review_taste
+
+**Summary**:
+
+Its a pretty compact data about Breweries, Beer and Reviews. With Cat and Num vars. Dont need to much cleaning, cool.
+
+Basic understanding - done
+
+#### **2. Data health**
+
+What is healthy data? Here is my framework:
+
+-   Import errors - wrong delimiters, missing colnames, footnotes or appendix, wrong encoding
+-   Data types - wrong date formats, char instead of numeric, unneeded lists
+-   Data quality - inconsistency in Tidy structure, missing data, unusual NAs or 0s, bad naming, duplicates
+-   Complex variables - high cardinality, parameters for split, "other" category
+
+```{r}
+#| label: health-check-integrity
+#| column: page
+#| warning: false
+#| cache: true
+
+data |> data_integrity() |> summary()
+
+```
+
+\- brewery_id - !fix to char\
++ brewery_name - !fix NA\
+- beer_beerid -!fix to char\
++ beer_abv - !fix NA 4%\
++ review_profilename - !fix NA\
++ review_time - !fix to posix\
++ review_overall - !fix zeros, seems like a bug from a single user, !fix multiple observations per single beer\
++ review_appearance - !fix zeros
+
+```{r}
+#| label: health-check-cleaning
+#| column: page
+#| warning: false
+#| cache: true
+
+# Fixing Vars order, NAs, Zeros, Dates
+data <- 
+  
+  data |> 
+  select(
+    brewery_id,
+    brewery_name,
+    beer_style,
+    beer_name,
+    beer_beerid,
+    beer_abv,
+    review_profilename,
+    review_time,
+    review_overall,
+    review_aroma,
+    review_appearance,
+    review_palate,
+    review_taste) |>  
+  na.omit() |>
+	filter(review_overall != 0) |> 
+  mutate(review_time = as_datetime(review_time)) 
+
+# Fixing multiple observations per single beer. Using Arrange + Slice to pick the last score
+data <-
+
+  data |>
+  arrange(desc(review_time)) |>
+  group_by(review_profilename, beer_name) |>
+  slice(1) |> ungroup()
+
+# Removing ID
+data <- 
+  
+  data |> 
+  select(-c(brewery_id, beer_beerid))
+
+# data |> write_csv("data.csv")
+
+```
+
+I'm just cutting out all NAs, since its not so much of a loss (4% of data), but saves me a lot of time.\
+High cardinality is aligned with the nature of data, I can keep it the same untill I need more advanced feature engineering.\
+Some users are reviewing the same beer multiple times, ill just pick the last score and cut the older ones.\
+Why there are brewery_id and brewery_name? Are duplicating each other? Same for the beer. Some names can be not unique, \~15% of beernames. Want to do a quickest solution here - just ignore IDs.
+
+Health is fine now - done
+
+#### **3. Conclusion**
+
+I've got the basic understanding of the data, cleaned it and now I can move on to the analysis.
+
+### **Step 2 - Univariate analysis**
+
+What type of variation occurs within my variables?
+
+1.  What are the typical values?
+2.  Is there any visible clusters?
+3.  Is there outliers?
+
+To answer those, I'll use descriptive statistics to get central tendency, spread and distribution shape.\
+Distribution for num, Frequencies for cat.\
+Also data visualisation is useful because its easy to miss something in a table full of values.
+
+#### **1. Typical values**
+
+For every var, I'll quickly go with this questions:
+
+-   Which values are the most common/rare? Why?
+-   Any unusual patterns? Possible explanations?
+
+**For numerical variables:**\
+Sadly my laptop cant handle the usual approach im using: building a descriptive statistics for each variable and combining it with distribution plots inside a single table.
+
+```{r}
+#| label: univar-numeric
+#| column: page
+#| warning: false
+#| cache: true
+#| eval: false
+
+# Building a table that combines descriptive stats and barplots to check for distribution shapes.
+
+# Custom function to gather stats
+extended_skim <- skim_with(
+  numeric = sfl(
+    # iqr = IQR,
+    # variation_coef = ~ sd(.x, na.rm = T) / mean(.x, na.rm = T),  # CV
+    # new_hist = ~ inline_hist(.x, n_bins = 10),  # Add more bins to a default hist
+    hist = NULL
+  ),
+  # factor = sfl(missing = ~ sum(is.na(.))),  #
+  append = T
+)
+
+data_descriptive_numerical <- data |> head(1000) |> 
+  select(-c(brewery_id, beer_beerid, review_time)) %>%
+  select_if(is.numeric) %>%
+  mutate_all(~ ifelse(. == 0, NA, .)) %>%
+  map(~ .x[!is.na(.x)]) %>%
+  enframe(name = "Column", value = "Values")
+
+data_descriptive_skim <- data |> head(1000) |> 
+  select(-c(brewery_id, beer_beerid, review_time)) %>%
+  extended_skim() %>%
+  yank("numeric") %>%
+  mutate_if(is.numeric, round, 1)
+
+data_descriptive_merged <- 
+  left_join(
+    data_descriptive_numerical,
+    data_descriptive_skim,
+    by = c("Column" = "skim_variable")
+  ) |>
+  relocate(Values, .after = p100)
+
+data_descriptive_merged |>
+  gt() %>%
+  gt_plt_dist(
+    Values,
+    type = "histogram",
+    same_limit = F,
+    fig_dim = c(10, 100),
+    trim = T
+  )
+```
+
+Here is a quick workaround.
+
+```{r}
+#| label: univar-numeric-descriptive
+#| column: page
+#| warning: false
+#| cache: true
+
+# Descriptive stats + barplots
+
+data <- read_csv("data.csv")
+
+data %>%
+  select_if(is.numeric) %>%
+  profiling_num() %>% 
+  select(variable, mean, std_dev, p_50, range_98) |> 
+  mutate_if(is.numeric, round, 2)
+```
+
+Descriptive statistics and distribution plots.
+
+```{r}
+#| label: univar-numeric-distribution
+#| column: page
+#| warning: false
+#| cache: true
+
+# Clean theme
+theme_set(theme_minimal() + theme(
+  plot.margin = margin(0.3, 0.3, 0.3, 0.3, "cm"), # Прижимает всю картинку к краю
+  axis.line = element_line(size = 0.5, colour = "grey80"),
+  plot.title = element_text(hjust = 0.5, vjust = -10), # Центрирует заголовок
+  plot.subtitle = element_text(hjust = 0.1),
+  plot.caption = element_text(hjust = 0.1),
+  panel.grid.major = element_line(linetype = "blank"),
+  panel.grid.minor = element_line(linetype = "blank"),
+  panel.background = element_rect(fill = "white"),
+  plot.background = element_rect(fill = "white", colour = NA)))
+
+# Hists for reviews
+data |> 
+  select(-c(review_time, beer_abv)) |> 
+  plot_num(bins = 9)
+# You cant score 0 or 0.5, so 9 bins
+
+# Hist for ABV 
+data %>%
+  ggplot(aes(beer_abv)) +
+  geom_histogram(colour = '#00E5EE', size = 0.1, fill = '#00E5EE', bins = 100)
+```
+
+Reviews distributions looks the same - skewed right, with peaks at 4.\
+5 stars is quite rare, relative to the rest scores. I'm guessing that the users **really** likes the 5 beers.\
+ABV is different, skewed left, mostly (90%) lower than 10. With a tail of a much more alcoholic beers.\
+Tho I need to group by beer to not count same beer ABV from different users.
+
+**For categorical variables:**
+
+I'm using a Skimr to get an idea of the var levels.
+
+```{r}
+#| label: univar-cat
+#| column: page
+#| warning: false
+#| cache: true
+
+# Custom function to gather stats
+extended_skim <- skim_with(
+  numeric = sfl(
+    # iqr = IQR,
+    # variation_coef = ~ sd(.x, na.rm = T) / mean(.x, na.rm = T),  # CV
+    # new_hist = ~ inline_hist(.x, n_bins = 10),  # Add more bins to a default hist
+    hist = NULL
+  ),
+  # factor = sfl(missing = ~ sum(is.na(.))),  #
+  append = T
+)
+
+data %>%
+  extended_skim() %>%
+  yank("character") 
+
+data %>%
+  extended_skim() |> 
+  yank("POSIXct")
+
+```
+
+Building a frequency tables using funModeling. Skipping plots, because too much unique values.
+
+```{r}
+#| label: univar-cat-freq
+#| column: page
+#| warning: false
+#| cache: true
+ 
+freq(data, plot = F)
+```
+
+Most frequent names are:\
+Brewery - Boston Beer Company, 2.58% of all reviews\
+Beer style - American IPA, 7.39%\
+Beer - 90 Minute IPA, 0.21%\
+Top user reviewed over 5k beers
+
+#### **2. Visual clusters**
+
+Skipping to save time
+
+#### **3. Outliers**
+
+Skipping to save time
+
+#### **4. Conclusion**
+
+This data is about craft beers and hardcore beer lovers, not Heineken grocery store beers.
+
+The scores distributed pretty meaningfull - most beers are OK (score 4), and just plenty are the ones that people really like (score 5).\
+I'm curious what makes the difference between 4 and 5. Is it just random, or there is real factors that makes the beer the best one you've tried.
+
+There is a good variety of beers and beer styles (100+) by many breweries and reviewers. With the nice diversity at top.\
+Some reviewers I can call a Power Users, because they had thousands of beers reviewed.
+
+Nex step, i'm interested to dive deeper into data.
+
+### **Step 3 - Multivariate analysis**
+
+What is **my goal** here? In a formal way its this: what type of covariation occurs between my variables?\
+Covariation is the tendency for variables to vary together in a related way. Visualization is a good way to spot it.\
+So, I'm looking for some visual **indicators of a relationships** or dependencies in data.
+
+For different data types, there is different approaches:
+
+1.  Comparing Num vs Num, using correlations heatmap and scatterplots
+2.  Comparing Cat vs Num, using boxplots/violins
+3.  Comparing Cat vs Cat, using contigency tables
+
+#### **1. Correlations**
+
+Best way to get the ideas about the relationships in numeric vars - is visually heat-mapping a corr matrix.
+
+```{r}
+#| label: multivar-corr
+#| column: page
+#| warning: false
+#| cache: true
+
+# Compute correlation matrix using Spearman's correlation
+correlation_matrix <- data |>
+  select_if(is.numeric) |>
+  cor(method = "spearman", use = "pairwise.complete.obs")
+
+correlation_matrix <- round(correlation_matrix * 10, 1)
+
+# Create correlation heatmap
+corrplot::corrplot(
+  correlation_matrix,
+  method = "color", type = "full",
+  # order = "hclust",
+  addCoef.col = "black", tl.col = "black",
+  tl.srt = 45,
+  number.cex = 0.8,
+  tl.cex = 0.6,
+  is.corr = F
+)
+
+rm(correlation_matrix)
+```
+
+Beer ABV not correlated much with overall score. This can be interesting to see, how this corr differs accross more experienced users and less.\
+Aroma and appearance are slightly less correlated with score, than Palate and Taste. Might be less important?
+
+#### **2. Boxplots**
+
+**Score per Style**
+
+```{r}
+#| label: multivar-styles
+#| column: page
+#| warning: false
+#| cache: true
+
+# Scores for most reviewed styles
+popular_styles <- 
+  
+  data |> 
+  select(review_overall, beer_style) |> 
+  group_by(beer_style) |> 
+  summarise(
+    mean_score = mean(review_overall) |> round(2),
+    quantity = n(),
+    .groups = 'drop') |> 
+  arrange(-quantity)
+
+popular_styles
+popular_styles_top <- popular_styles$beer_style |> head(10)
+
+# Plot
+data |> 
+  filter(beer_style %in% popular_styles_top) |> 
+  ggplot(aes(x = review_overall, y = beer_style)) +
+  geom_boxplot(width = 0.2, outlier.shape = NA) +
+  labs(x = "Score", y = "Style")
+
+# Best rated beers
+popular_styles |> arrange(-mean_score)
+
+rm(popular_styles)
+```
+
+Doesn't looks like much. Fruit / Vegetable Beers seems worse than the rest.\
+To get more from this visual, need to use error bars with con intervals for means. And look for the best rated styles instead of popular.\
+For top rated beers, there is very low difference (less than 1%) between mean score. So can say for sure which is better.
+
+**Reviews per Beer**
+
+```{r}
+#| label: multivar-beers
+#| column: page
+#| warning: false
+#| cache: true
+
+reviews_per_beer <- data %>%
+  group_by(beer_name) %>%
+  summarise(quantity = n(), .groups = 'drop')
+
+reviews_per_beer |> 
+  ggplot(aes(x = quantity)) +
+  geom_histogram(colour = '#00E5EE', fill = '#00E5EE', binwidth = 1) +
+  labs(x = "Reviews", y = "Beers") +
+  xlim(0, 25)
+
+quantile(reviews_per_beer$quantity, probs = seq(0.15, 1, 0.05))
+
+rm(reviews_per_beer)
+
+```
+
+```         
+15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80%  85%  90%  95% 100%     
+  1    1    1    1    2    2    3    3    4    5    6    8   12   18   31   59  151 3206
+```
+
+So, median is 3, means there is **a lot of** rare beers. More percisely, beers that almost noone reviewed.\
+Looks bad, because I don't really know I can trust those reviews.\
+Possible ways to fix it - google / pick threashold random / find fitting stat test .... ???
+
+**Beers per brewery**
+
+```{r}
+#| label: multivar-brew
+#| column: page
+#| warning: false
+#| cache: true
+
+beers_per_brewery <- data |> 
+  group_by(brewery_name) %>%
+  summarise(quantity = n_distinct(beer_name), .groups = 'drop')
+
+beers_per_brewery |> 
+  ggplot(aes(x = quantity)) +
+  geom_histogram(colour = '#00E5EE', fill = '#00E5EE', binwidth = 1) +
+  labs(x = "Beers", y = "Breweries") +
+  xlim(0, 25)
+
+quantile(beers_per_brewery$quantity, probs = seq(0.05, 1, 0.05)) |> round()
+
+rm(beers_per_brewery)
+
+```
+
+```         
+  5%  10%  15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80%  85%  90%  95% 100%     
+   1    1    1    1    2    2    3    3    4    4    5    6    7    9   10   12   16   22   34  521 
+```
+
+Many rare breweries with just a couple of beers. Might be OK, if a brewery produces just one or two sorts, but nailed it.
+
+#### **3. Cat vs Cat analysis**
+
+Skip 
+
+#### **4. Conclusion**
+
+ABV is probably not super important, because it doesn't correlates well with the score.\
+I need to deal with the question: can I trust scores with low number of reviewers? Half of the 50k of beers been reviewed by 1-3 users.\
+
+## Questions
+
+### 1. Which brewery produces the strongest beers by ABV%?
+
+This question is a bit tricky because of the **2 possible interpretations:**\
+- What is the typical strength of this brewery beers? (1 strong + 9 light scores brewery as low typical ABV)\
+- Who is capable to produce extremely strong beer? (1 strong + 9 light scores brewery as high absolute ABV)
+
+**What is the typical strength of this brewery beers?**
+
+Some disclaimers:\
+I'm using median, because its less sensitive to a big outliers, so "typical" by median is more precise.\
+Decided not to exclude low-variety breweries, because the dataset spans across 14 years. And if a brewery has just one beer so far, then its just on beer. You guys had 14 years to discover more \>\_\<
+
+```{r}
+#| label: question-one
+#| column: page
+#| warning: false
+#| cache: true
+
+data |> 
+  
+  group_by(brewery_name) |> 
+  summarise(
+    median_abv = mean(beer_abv) |> round(1),
+    quantity = n(),
+    .groups = 'drop') |> 
+  arrange(-median_abv) |> head(15) |> 
+  ggplot(aes(x = median_abv, y = reorder(brewery_name, median_abv))) +
+  geom_point(colour = 'black', fill = '#00E5EE', size = 1) +
+  labs(x = "ABV", y = "Brewery")
+
+# So thats our dudes
+data %>%
+  filter(brewery_name == "Schorschbräu") %>%
+  distinct(beer_name, beer_abv) |> 
+  arrange(-beer_abv)
+
+```
+
+Schorschbräu it is.
+
+**Who is capable to produce extremely strong beer?**
+
+```{r}
+#| label: question-one-alternative
+#| column: page
+#| warning: false
+#| cache: true
+
+data |>
+  arrange(-beer_abv) |>
+  group_by(brewery_name) |>
+  slice(1) |> ungroup() |> 
+  select(brewery_name, beer_name, beer_abv) |> 
+  arrange(-beer_abv) |> head(10)
+
+```
+
+#### **Conclusion**
+
+Strongest beer by brewery. Aaaand, same dudes on top here \>\_\<\
+Schorschbräu Schorschbock 57%, is this even a beer?!
+
+**Ways to improve**
+
+Mark the low variety breweries. Or filter them out.\
+Google what AVB considering strong.\
+... something else.
+
+### 2. If you had to pick 3 beers to recommend using only this data, which would you pick?
+
+I can see **2 major ways** I can solve this problem. With even more smaller options for each one.
+
+**First** - is to focus on recommending a beers based on personal preferences.
+
+This approach is abount building a recommendation model based on Collaborative Filtering.\
+Finding similarities between users or their behavior, and describing them as factors:\
+there is users who likes fruits beers, or beers of specific region or year, maybe users who like try new tastes.. etc.
+
+Basic implementations are:\
+- Auto-Encoders (more flexible, but compute heavy)\
+- Matrix Factorization (SVD, ALS) (more interpretable, but linear)
+
+Pros: if I know a user preferences, I can recommend a cool beer to try, those models are pretty powerfull\
+Cons: not so easy to implement + need good data\
+**Conclusion:** by my experience, its easy to build such model, but too risky when you are low on time.\
+First model wont work well 90% of the times. At least a couple of feature ingeneering / parameters tweaking iterations needed to get good results.
+
+**Second** - is to focus on average best-fit-for-anybody score.
+
+Here we are looking for some metrics, averaging them and picking the beers that happened to be on top.
+
+What possible approaches I see:\
+- Simple: Just pick top-rated beers. Might be biased, due to personal preferences and lacking enough reviews.\
+- Weigted: Use weighted score by many factors. Solves the robustness issue, but gives you average results.\
+- Expert-oriented: Find most experienced reviewers and see their recent top beers. Bias towards experts tastes.
+
+Pros: I can make this in time and be confident to get OK result\
+Cons: can't be confident enough, because there is no clear utility function i can use to validate results\
+**Conclusion:** less risky, but lower quality of recomendations
+
+Gonna use Weighted approach. I'm aiming for recommending a solid good beer, not finding a 100% best beer of your life.\
+Factors and weights will be:\
+- beer_rating: 0.4 (review_overall)\
+- beer_popularity: 0.1\
+- rating_consistency: 0.1 (low deviation in taste, aroma, appearance, palate)\
+- brewery_popularity: 0.1\
+- brewery_rating: 0.1\
+- style_popularity: 0.1\
+- style_rating: 0.1\
+- reviews_quality: 0 (recency, diversity of reviewers, experience of reviewers)
+
+```{r}
+#| label: question-two
+#| column: page
+#| warning: false
+#| cache: true
+
+# Calculating factors
+data <- data %>%
+  rowwise() %>%
+  mutate(rating_consistency = sd(c(review_taste, review_aroma, review_appearance, review_palate))) %>% ungroup()
+
+data <- data |> 
+  group_by(beer_name) %>%
+  mutate(
+    beer_popularity = n(),
+    beer_rating = mean(review_overall),
+    rating_consistency = mean(rating_consistency)) %>% ungroup() %>%
+  group_by(brewery_name) %>%
+  mutate(
+    brewery_popularity = n(),
+    brewery_rating = mean(review_overall)) %>% ungroup() %>%
+  group_by(beer_style) %>%
+  mutate(
+    style_popularity = n(),
+    style_rating = mean(review_overall)) %>% ungroup()
+ 
+# Min-max normalization to 0-1 scale
+data <- data %>%
+  mutate(
+    across(c(
+      beer_rating, beer_popularity, rating_consistency, 
+      brewery_popularity, brewery_rating, 
+      style_popularity, style_rating),
+    ~ (.x - min(.x)) / (max(.x) - min(.x)), 
+    .names = "n_{.col}")) |> 
+  mutate(n_rating_consistency = 1 - n_rating_consistency) # fix lower is better
+
+# Weighted score for each beer
+recomended_beers <- data |>
+  group_by(beer_name) |> 
+  slice(1) |> ungroup() |> 
+  rowwise() |> mutate(
+    weighted_score = sum(
+      c_across(starts_with("n_")) * 
+      c(0.4, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1))) |> ungroup() %>%
+  arrange(-weighted_score) %>%
+  select(
+    brewery_name, beer_style, beer_name, 
+    weighted_score, beer_abv, beer_popularity, beer_rating, 
+    brewery_popularity, brewery_rating, style_popularity, style_rating)
+
+recomended_beers |> filter(beer_popularity > 10) |> head(20)
+
+# recomended_beers |> 
+#   group_by(beer_style) |> slice(1) |> 
+#   select(beer_style, style_popularity, style_rating) |> View()
+
+```
+
+No Lagers on top? Unexpected, to be honest. Everyone can handle a Lager, because its usual "averaged" beer with no extremes.\
+American IPA/APA seems the way to go.\
+I'm picking 3 different styles from 3 different breweries to continue the idea of averaging and finding just solid good beers to try:
+
+```{r}
+#| label: question-two-cherrypicking
+#| column: page
+#| warning: false
+#| cache: true
+
+recomended_beers |> 
+  filter(beer_name %in% c(
+    "Stone IPA (India Pale Ale)", 
+    "90 Minute IPA", 
+    "Sierra Nevada Pale Ale")) |> 
+  mutate_if(is.numeric, ~ round(., 2))
+
+```
+
+#### Conclusion
+
+All of those beers are from popular styles and good breweries. Raitings are also quite high.\
+One cool factor - all those breweries has all of those beer styles.\
+So, for example, you can freely swap to Stone Brewing Co. APA in cas your local bar doesn't have Sierra Nevada Brewing Co. beers.
+
+As expected, I cant really validate the quality of my solution precisely.\
+So i'm just google some top-n craft beers to try and see if my dudes are in there!
+
+**Ways to improve**
+
+Add reviews_quality metric, tweak weights, 2 common + 1 rare beer recomendation.
+
+### 3. Which of the factors (aroma, taste, appearance, palette) are most important in determining the overall quality of a beer?
+
+**Possible approaches here are:**
+
+-   Correlation Analysis - Checks linear relationships
+-   Regression - More advanced linear model, that can estimate factor importance
+-   Decision tree models (RF or Gradient Boosting) - Feature importance for non-linear relationships
+-   Dimension reduction (PCA) - New features if data has many variables
+
+I already did Corr analysis in EDA - Step 3 - Multivariate analysis section.\
+Aroma and appearance are slightly less correlated with score, than Palate and Taste.
+
+But Taste and Palate have good signs of linear dependency. Meaning I can use linear regression to get more info.
+
+```{r}
+#| label: question-three
+#| column: page
+#| warning: false
+#| cache: true
+
+regression_data <- data %>% select(review_overall, review_aroma, review_appearance, review_palate, review_taste)
+  
+# Fit a linear model
+regression <- 
+  lm(review_overall ~ review_aroma + review_appearance + review_palate + review_taste, 
+  data = regression_data)
+
+# R2
+summary(regression)$r.squared
+
+# Calculating MSE
+mean((predict(regression, regression_data) - regression_data$review_overall)^2)
+
+# Factors
+broom::tidy(regression) |> mutate_if(is.numeric, ~ round(., 2)) |> select(term, estimate)
+
+
+```
+
+#### Conclusion
+
+R2 = 65% meaning, more than half of the variance can be explained by factors in our model. Rest 35% may be random or unknown to our data factors.\
+Seems a good fit: we can trust the model results.\
+MSE = 0.18 meaning the model has the space for improvement (lower - the better).
+
+Coefficient for Taste = 0.55 meaning point in the taste score increases review score by 0.55 points. Meaning Taste is most important factor.\
+Palate is less, Aroma/Appearance are insignificant.
+
+**Ways to improve**
+
+There are more techniques to get a proper feature importance (how each factor contributes to the explained variance) out of regression.\
+MSE says there is a room to try different models.
+
+### 4. If I typically enjoy a beer due to its aroma and appearance, which beer style should I try?
+
+**Possible approaches here are:**
+
+-   Average scores - simple, gives idea of the styles with the highest average aroma/appearance ratings
+-   Correlations - to get an idea of relationships
+-   ML - same methods as in Question 2 to model complex relationships
+-   Clustering - groups similar styles by aroma / appearance ratings and find similar users
+
+Lets go with the simplest solution, since i've already used same approach before.
+
+```{r}
+#| label: question-four
+#| column: page
+#| warning: false
+#| cache: true
+
+# Calculating factors
+data <- data |> 
+  group_by(beer_name) %>%
+  mutate(
+    beer_aroma = mean(review_aroma),
+    beer_appearance = mean(review_appearance)) %>% ungroup()
+
+# Min-max normalization to 0-1 scale
+data <- data %>%
+  mutate(arap_consistency = abs(beer_aroma - beer_appearance)) |> 
+  group_by(beer_style) %>%
+  mutate(
+    style_aroma = mean(beer_aroma),
+    style_appearance = mean(beer_appearance),
+    style_arap_consistency = mean(arap_consistency)) %>% ungroup()
+    
+data <- data |> 
+  mutate(
+    across(c(
+      style_aroma, style_appearance, style_arap_consistency),
+    ~ (.x - min(.x)) / (max(.x) - min(.x)), 
+    .names = "n_{.col}")) |> 
+  mutate(n_style_arap_consistency = 1 - n_style_arap_consistency) # fix lower is better
+
+# Weighted score for each beer
+recomended_arap_beers <- data |>
+  group_by(beer_style) |> 
+  slice(1) |> ungroup() |> 
+  rowwise() |> mutate(
+    weighted_score = sum(
+      c_across(starts_with("n_style")) * 
+      c(0.1, 0, 0.4, 0.4, 0.1))) |> ungroup() %>%
+  arrange(-weighted_score) %>%
+  select(
+    beer_style, weighted_score,
+    style_aroma, style_appearance,
+    style_rating, style_popularity, style_arap_consistency)
+
+recomended_arap_beers |> mutate_if(is.numeric, ~ round(., 2)) |> head(10)
+
+```
+
+#### Conclusion
+
+So, American Double / Imperial IPA is the winner here. High scores in both Aroma and Appearance, popular style.
+
+**Ways to improve**
+
+Dunno
+
+### 5. Use bootstrapping to investigate if there is seasonality in the overall ratings.
+
+**Possible approaches here are:**
+
+-   Seasonal Decomposition - gets trend, seasonality, and residuals components + BT for CI for the seasonal component.
+-   Fourier analysis - converts time series data to frequencies and gets multiple seasonal patterns. Complex and hard to interpret.
+-   SARIMA modeling - to get seasoning patterns and forecast trends. Complicated and not compatible with BT
+
+Decomposition is simple to implement and easy to visualize and understand.
+
+**Plan**
+
+Seasonal decomposition\
+Bootstrap the seasonal component to estimate confidence intervals\
+Plot the results
+
+```{r}
+#| label: question-five
+#| column: page
+#| warning: false
+#| cache: true
+
+# Reloading to fix missing data
+seasoning <- read.csv("beer_reviews.csv")
+
+seasoning <- seasoning |> 
+	filter(review_overall != 0) |> 
+  mutate(
+    review_time = ymd_hms(as_datetime(review_time)),
+    month = floor_date(review_time, "month")) |> 
+  filter(
+    month >= ymd("2002-01-01"),
+    month < ymd("2012-01-01")) |> 
+  select(review_time, month, review_overall)
+
+# seasoning |> write_csv("seasoning.csv")
+  
+# seasoning |> data_integrity() |> summary()
+# 
+# # Filling missing months
+# test$month <- as.Date(test$month)
+# 
+# test <- 
+#   tibble(month = seq.Date(
+#     min(test$month), 
+#     max(test$month), 
+#     by="month")) %>%
+#   left_join(test, by = "month") |> 
+#   mutate(rating = ifelse(
+#     is.na(rating), 
+#     (lag(rating) + lead(rating)) / 2, 
+#     rating)) |> 
+#   filter(month >= ymd("1998-01-01")) # Cut for old data
+
+
+
+# Monthly average
+monthly_ratings <- seasoning %>%
+  mutate(month = as.Date(month)) %>%
+  group_by(month) %>%
+  summarise(
+    review_overall = mean(review_overall),
+    review_quantity = n())
+
+# STL decomposition
+stl_result <- stl(
+  ts(
+    monthly_ratings$review_overall, 
+    frequency = 12, 
+    start = c(
+      year(min(monthly_ratings$month)), 
+      month(min(monthly_ratings$month)))), 
+  s.window = "periodic")
+
+# Plot STL components
+plot(stl_result)
+
+# Average seasonal effect for each month
+data.frame(
+  month = factor(1:12, labels = month.abb),
+  effect = colMeans(matrix(stl_result$time.series[, 1], ncol = 12, byrow = T))) |> 
+ggplot(aes(x = month, y = effect)) +
+  geom_line(group = 1) +
+  geom_point() +
+  labs(title = "Average Over 12 Months",
+       x = "Month",
+       y = "Average Seasonal Effect")
+
+monthly_data <- 
+bind_cols(
+  monthly_ratings,
+  data.frame(stl_result$time.series))
+
+
+
+monthly_data |> mutate(
+  month_name =  month(month, label = T)) |> 
+  group_by(month_name) |> summarise(
+    n = sum(review_quantity),
+    mean = mean(seasonal),
+    sd = sd(seasonal))
+
+
+
+  View()
+  profiling_num() |> 
+  mutate_if(is.numeric, ~ round(., 3))
+
+  
+```
+
+Wooow, clear visual seasoning, but small.\
+The remainder component is the data that can't be explained by the trend + seasonal components. It's centered around zero, which is a good sign.\
+Means that the decomposition has effectively captured the trend and seasonality, leaving behind mostly noise.
+
+```{r}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+```{r}
+
+# Custom bootstrap function
+bootstrap_custom <- function(x, confidence = 0.95, iterations = 10000) {
+  quantile(
+    bootstrap(x, iterations, mean)$thetastar,
+    c((1 - confidence)/2, 1 - (1 - confidence)/2))}
+
+seasonal_component <- as.vector(decomposition$time.series[,1])
+
+# Bootstrap confidence intervals
+bootstrap_results <- map_dfr(seasonal_component, ~{
+  ci <- bootstrap_custom(.x)
+  tibble(
+    ci_lower = ci[1],
+    ci_upper = ci[2]
+  )
+})
+
+# Add the month and seasonal component to the results using tidyverse functions
+bootstrap_results <- bootstrap_results %>%
+  mutate(
+    month = seasoning$month,
+    seasonal_component = seasonal_component
+  )
+
+ggplot(bootstrap_results, aes(x = month)) +
+  geom_line(aes(y = seasonal_component)) +
+  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), fill = "skyblue", alpha = 0.4) +
+  labs(
+    title = "Seasonal Component with Pointwise 95% Confidence Intervals",
+    x = "Month",
+    y = "Seasonal Component"
+  )
+
+```
