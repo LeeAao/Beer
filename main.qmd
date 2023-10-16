@@ -33,8 +33,7 @@ install_and_load_packages <- function(packages) {
 }
 
 install_and_load_packages(c(
-  "tidyverse", "reactable", "DT", "skimr", "gt", "gtExtras", "styler", "kableExtra", "forecast", "bootstrap", "zoo",
-  "Hmisc", "ROCR", "gridExtra", "pander", "reshape2", "lazyeval", "moments", "entropy", "corrplot"
+  "tidyverse", "reactable", "DT", "skimr", "gt", "gtExtras", "styler", "kableExtra", "forecast", "bootstrap", "zoo", "Hmisc", "ROCR", "gridExtra", "pander", "reshape2", "lazyeval", "moments", "entropy", "corrplot", "boot"
 ))
 
 # install.packages("https://cran.r-project.org/src/contrib/Archive/funModeling/funModeling_1.9.4.tar.gz", repos = NULL, type = "source")
@@ -103,7 +102,7 @@ Lets group and describe variables:\
 \
 So this data is about
 
--   5k+ breweries\
+-   Breweries\
     brewery_id - !fix to char\
     brewery_name - **There is 5k+ different breweries**, !fix NA
 
@@ -163,39 +162,29 @@ data |> data_integrity() |> summary()
 #| cache: true
 
 # Fixing Vars order, NAs, Zeros, Dates
-data <- 
-  
-  data |> 
+data <-
+  data |>
   select(
-    brewery_id,
-    brewery_name,
-    beer_style,
-    beer_name,
-    beer_beerid,
-    beer_abv,
-    review_profilename,
-    review_time,
-    review_overall,
-    review_aroma,
-    review_appearance,
-    review_palate,
-    review_taste) |>  
+    brewery_id, brewery_name,
+    beer_style, beer_name, beer_beerid, beer_abv,
+    review_profilename, review_time,
+    review_overall, review_aroma, review_appearance, review_palate, review_taste
+  ) |>
   na.omit() |>
-	filter(review_overall != 0) |> 
-  mutate(review_time = as_datetime(review_time)) 
+  filter(review_overall != 0) |>
+  mutate(review_time = as_datetime(review_time))
 
 # Fixing multiple observations per single beer. Using Arrange + Slice to pick the last score
 data <-
-
   data |>
   arrange(desc(review_time)) |>
   group_by(review_profilename, beer_name) |>
-  slice(1) |> ungroup()
+  slice(1) |>
+  ungroup()
 
 # Removing ID
-data <- 
-  
-  data |> 
+data <-
+  data |>
   select(-c(brewery_id, beer_beerid))
 
 # data |> write_csv("data.csv")
@@ -256,15 +245,15 @@ extended_skim <- skim_with(
   append = T
 )
 
-data_descriptive_numerical <- data |> head(1000) |> 
-  select(-c(brewery_id, beer_beerid, review_time)) %>%
+data_descriptive_numerical <- data |> 
+  select(-c(review_time)) %>%
   select_if(is.numeric) %>%
   mutate_all(~ ifelse(. == 0, NA, .)) %>%
   map(~ .x[!is.na(.x)]) %>%
   enframe(name = "Column", value = "Values")
 
-data_descriptive_skim <- data |> head(1000) |> 
-  select(-c(brewery_id, beer_beerid, review_time)) %>%
+data_descriptive_skim <- data |> 
+  select(-c(review_time)) %>%
   extended_skim() %>%
   yank("numeric") %>%
   mutate_if(is.numeric, round, 1)
@@ -298,13 +287,12 @@ Here is a quick workaround.
 
 # Descriptive stats + barplots
 
-data <- read_csv("data.csv")
-
 data %>%
   select_if(is.numeric) %>%
   profiling_num() %>% 
   select(variable, mean, std_dev, p_50, range_98) |> 
   mutate_if(is.numeric, round, 2)
+
 ```
 
 Descriptive statistics and distribution plots.
@@ -383,6 +371,7 @@ Building a frequency tables using funModeling. Skipping plots, because too much 
 #| column: page
 #| warning: false
 #| cache: true
+#| eval: false
  
 freq(data, plot = F)
 ```
@@ -469,25 +458,26 @@ Aroma and appearance are slightly less correlated with score, than Palate and Ta
 #| column: page
 #| warning: false
 #| cache: true
+#| eval: false
 
 # Scores for most reviewed styles
-popular_styles <- 
-  
-  data |> 
-  select(review_overall, beer_style) |> 
-  group_by(beer_style) |> 
+popular_styles <-
+  data |>
+  select(review_overall, beer_style) |>
+  group_by(beer_style) |>
   summarise(
     mean_score = mean(review_overall) |> round(2),
     quantity = n(),
-    .groups = 'drop') |> 
+    .groups = "drop"
+  ) |>
   arrange(-quantity)
 
 popular_styles
 popular_styles_top <- popular_styles$beer_style |> head(10)
 
 # Plot
-data |> 
-  filter(beer_style %in% popular_styles_top) |> 
+data |>
+  filter(beer_style %in% popular_styles_top) |>
   ggplot(aes(x = review_overall, y = beer_style)) +
   geom_boxplot(width = 0.2, outlier.shape = NA) +
   labs(x = "Score", y = "Style")
@@ -543,13 +533,13 @@ Possible ways to fix it - google / pick threashold random / find fitting stat te
 #| warning: false
 #| cache: true
 
-beers_per_brewery <- data |> 
+beers_per_brewery <- data |>
   group_by(brewery_name) %>%
-  summarise(quantity = n_distinct(beer_name), .groups = 'drop')
+  summarise(quantity = n_distinct(beer_name), .groups = "drop")
 
-beers_per_brewery |> 
+beers_per_brewery |>
   ggplot(aes(x = quantity)) +
-  geom_histogram(colour = '#00E5EE', fill = '#00E5EE', binwidth = 1) +
+  geom_histogram(colour = "#00E5EE", fill = "#00E5EE", binwidth = 1) +
   labs(x = "Beers", y = "Breweries") +
   xlim(0, 25)
 
@@ -595,22 +585,25 @@ Decided not to exclude low-variety breweries, because the dataset spans across 1
 #| warning: false
 #| cache: true
 
-data |> 
-  
-  group_by(brewery_name) |> 
+# Updated code for horizontal barplot
+data |>
+  group_by(brewery_name) |>
   summarise(
     median_abv = mean(beer_abv) |> round(1),
     quantity = n(),
-    .groups = 'drop') |> 
-  arrange(-median_abv) |> head(15) |> 
-  ggplot(aes(x = median_abv, y = reorder(brewery_name, median_abv))) +
-  geom_point(colour = 'black', fill = '#00E5EE', size = 1) +
-  labs(x = "ABV", y = "Brewery")
+    .groups = "drop"
+  ) |>
+  arrange(-median_abv) |>
+  head(15) |>
+  ggplot(aes(x = reorder(brewery_name, median_abv), y = median_abv)) +
+  geom_col(fill = "#00E5EE") +
+  coord_flip() +
+  labs(x = "Brewery", y = "ABV")
 
 # So thats our dudes
 data %>%
   filter(brewery_name == "Schorschbräu") %>%
-  distinct(beer_name, beer_abv) |> 
+  distinct(beer_name, beer_abv) |>
   arrange(-beer_abv)
 
 ```
@@ -628,9 +621,11 @@ Schorschbräu it is.
 data |>
   arrange(-beer_abv) |>
   group_by(brewery_name) |>
-  slice(1) |> ungroup() |> 
-  select(brewery_name, beer_name, beer_abv) |> 
-  arrange(-beer_abv) |> head(10)
+  slice(1) |>
+  ungroup() |>
+  select(brewery_name, beer_name, beer_abv) |>
+  arrange(-beer_abv) |>
+  head(10)
 
 ```
 
@@ -697,52 +692,72 @@ Factors and weights will be:\
 # Calculating factors
 data <- data %>%
   rowwise() %>%
-  mutate(rating_consistency = sd(c(review_taste, review_aroma, review_appearance, review_palate))) %>% ungroup()
+  mutate(rating_consistency = sd(c(review_taste, review_aroma, review_appearance, review_palate))) %>%
+  ungroup()
 
-data <- data |> 
+data <- data |>
   group_by(beer_name) %>%
   mutate(
     beer_popularity = n(),
     beer_rating = mean(review_overall),
-    rating_consistency = mean(rating_consistency)) %>% ungroup() %>%
+    rating_consistency = mean(rating_consistency)
+  ) %>%
+  ungroup() %>%
   group_by(brewery_name) %>%
   mutate(
     brewery_popularity = n(),
-    brewery_rating = mean(review_overall)) %>% ungroup() %>%
+    brewery_rating = mean(review_overall)
+  ) %>%
+  ungroup() %>%
   group_by(beer_style) %>%
   mutate(
     style_popularity = n(),
-    style_rating = mean(review_overall)) %>% ungroup()
- 
+    style_rating = mean(review_overall)
+  ) %>%
+  ungroup()
+
 # Min-max normalization to 0-1 scale
 data <- data %>%
   mutate(
-    across(c(
-      beer_rating, beer_popularity, rating_consistency, 
-      brewery_popularity, brewery_rating, 
-      style_popularity, style_rating),
-    ~ (.x - min(.x)) / (max(.x) - min(.x)), 
-    .names = "n_{.col}")) |> 
+    across(
+      c(
+        beer_rating, beer_popularity, rating_consistency,
+        brewery_popularity, brewery_rating,
+        style_popularity, style_rating
+      ),
+      ~ (.x - min(.x)) / (max(.x) - min(.x)),
+      .names = "n_{.col}"
+    )
+  ) |>
   mutate(n_rating_consistency = 1 - n_rating_consistency) # fix lower is better
 
 # Weighted score for each beer
 recomended_beers <- data |>
-  group_by(beer_name) |> 
-  slice(1) |> ungroup() |> 
-  rowwise() |> mutate(
+  group_by(beer_name) |>
+  slice(1) |>
+  ungroup() |>
+  rowwise() |>
+  mutate(
     weighted_score = sum(
-      c_across(starts_with("n_")) * 
-      c(0.4, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1))) |> ungroup() %>%
+      c_across(starts_with("n_")) *
+        c(0.4, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    )
+  ) |>
+  ungroup() %>%
   arrange(-weighted_score) %>%
   select(
-    brewery_name, beer_style, beer_name, 
-    weighted_score, beer_abv, beer_popularity, beer_rating, 
-    brewery_popularity, brewery_rating, style_popularity, style_rating)
+    brewery_name, beer_style, beer_name,
+    weighted_score, beer_abv, beer_popularity, beer_rating,
+    brewery_popularity, brewery_rating, style_popularity, style_rating
+  )
 
-recomended_beers |> filter(beer_popularity > 10) |> head(20)
+recomended_beers |>
+  filter(beer_popularity > 10) |>
+  head(20) |>
+  mutate_if(is.numeric, ~ round(., 2))
 
-# recomended_beers |> 
-#   group_by(beer_style) |> slice(1) |> 
+# recomended_beers |>
+#   group_by(beer_style) |> slice(1) |>
 #   select(beer_style, style_popularity, style_rating) |> View()
 
 ```
@@ -800,11 +815,12 @@ But Taste and Palate have good signs of linear dependency. Meaning I can use lin
 #| cache: true
 
 regression_data <- data %>% select(review_overall, review_aroma, review_appearance, review_palate, review_taste)
-  
+
 # Fit a linear model
-regression <- 
-  lm(review_overall ~ review_aroma + review_appearance + review_palate + review_taste, 
-  data = regression_data)
+regression <-
+  lm(review_overall ~ review_aroma + review_appearance + review_palate + review_taste,
+    data = regression_data
+  )
 
 # R2
 summary(regression)$r.squared
@@ -813,8 +829,9 @@ summary(regression)$r.squared
 mean((predict(regression, regression_data) - regression_data$review_overall)^2)
 
 # Factors
-broom::tidy(regression) |> mutate_if(is.numeric, ~ round(., 2)) |> select(term, estimate)
-
+broom::tidy(regression) |>
+  mutate_if(is.numeric, ~ round(., 2)) |>
+  select(term, estimate)
 
 ```
 
@@ -850,44 +867,60 @@ Lets go with the simplest solution, since i've already used same approach before
 #| cache: true
 
 # Calculating factors
-data <- data |> 
+data <- data |>
   group_by(beer_name) %>%
   mutate(
     beer_aroma = mean(review_aroma),
-    beer_appearance = mean(review_appearance)) %>% ungroup()
+    beer_appearance = mean(review_appearance)
+  ) %>%
+  ungroup()
 
 # Min-max normalization to 0-1 scale
 data <- data %>%
-  mutate(arap_consistency = abs(beer_aroma - beer_appearance)) |> 
+  mutate(arap_consistency = abs(beer_aroma - beer_appearance)) |>
   group_by(beer_style) %>%
   mutate(
     style_aroma = mean(beer_aroma),
     style_appearance = mean(beer_appearance),
-    style_arap_consistency = mean(arap_consistency)) %>% ungroup()
-    
-data <- data |> 
+    style_arap_consistency = mean(arap_consistency)
+  ) %>%
+  ungroup()
+
+data <- data |>
   mutate(
-    across(c(
-      style_aroma, style_appearance, style_arap_consistency),
-    ~ (.x - min(.x)) / (max(.x) - min(.x)), 
-    .names = "n_{.col}")) |> 
+    across(
+      c(
+        style_aroma, style_appearance, style_arap_consistency
+      ),
+      ~ (.x - min(.x)) / (max(.x) - min(.x)),
+      .names = "n_{.col}"
+    )
+  ) |>
   mutate(n_style_arap_consistency = 1 - n_style_arap_consistency) # fix lower is better
 
 # Weighted score for each beer
 recomended_arap_beers <- data |>
-  group_by(beer_style) |> 
-  slice(1) |> ungroup() |> 
-  rowwise() |> mutate(
+  group_by(beer_style) |>
+  slice(1) |>
+  ungroup() |>
+  rowwise() |>
+  mutate(
     weighted_score = sum(
-      c_across(starts_with("n_style")) * 
-      c(0.1, 0, 0.4, 0.4, 0.1))) |> ungroup() %>%
+      c_across(starts_with("n_style")) *
+        c(0.1, 0, 0.4, 0.4, 0.1)
+    )
+  ) |>
+  ungroup() %>%
   arrange(-weighted_score) %>%
   select(
     beer_style, weighted_score,
     style_aroma, style_appearance,
-    style_rating, style_popularity, style_arap_consistency)
+    style_rating, style_popularity, style_arap_consistency
+  )
 
-recomended_arap_beers |> mutate_if(is.numeric, ~ round(., 2)) |> head(10)
+recomended_arap_beers |>
+  mutate_if(is.numeric, ~ round(., 2)) |>
+  head(10)
 
 ```
 
@@ -906,164 +939,317 @@ Dunno
 -   Seasonal Decomposition - gets trend, seasonality, and residuals components + BT for CI for the seasonal component.
 -   Fourier analysis - converts time series data to frequencies and gets multiple seasonal patterns. Complex and hard to interpret.
 -   SARIMA modeling - to get seasoning patterns and forecast trends. Complicated and not compatible with BT
+-   Statistical Tests - Ljung-Box test or Chi-Squared test (not sure). Gives p-Value, very simple.
 
 Decomposition is simple to implement and easy to visualize and understand.
 
-**Plan**
-
-Seasonal decomposition\
-Bootstrap the seasonal component to estimate confidence intervals\
-Plot the results
+#### Seasonal decomposition
 
 ```{r}
-#| label: question-five
+#| label: question-five-decomposition
 #| column: page
 #| warning: false
 #| cache: true
+#| 
 
 # Reloading to fix missing data
 seasoning <- read.csv("beer_reviews.csv")
 
-seasoning <- seasoning |> 
-	filter(review_overall != 0) |> 
+# Cutting old data
+seasoning <- seasoning |>
+  filter(review_overall != 0) |>
   mutate(
     review_time = ymd_hms(as_datetime(review_time)),
-    month = floor_date(review_time, "month")) |> 
-  filter(
-    month >= ymd("2002-01-01"),
-    month < ymd("2012-01-01")) |> 
-  select(review_time, month, review_overall)
+    month = floor_date(review_time, "month")
+  ) |>
+  filter(month >= ymd("2002-01-01"), month < ymd("2012-01-01")) |>
+  select(review_time, month, review_overall) |>
+  mutate(month = as.Date(month))
 
 # seasoning |> write_csv("seasoning.csv")
-  
-# seasoning |> data_integrity() |> summary()
-# 
-# # Filling missing months
-# test$month <- as.Date(test$month)
-# 
-# test <- 
-#   tibble(month = seq.Date(
-#     min(test$month), 
-#     max(test$month), 
-#     by="month")) %>%
-#   left_join(test, by = "month") |> 
-#   mutate(rating = ifelse(
-#     is.na(rating), 
-#     (lag(rating) + lead(rating)) / 2, 
-#     rating)) |> 
-#   filter(month >= ymd("1998-01-01")) # Cut for old data
-
-
 
 # Monthly average
 monthly_ratings <- seasoning %>%
-  mutate(month = as.Date(month)) %>%
   group_by(month) %>%
   summarise(
     review_overall = mean(review_overall),
-    review_quantity = n())
+    review_quantity = n()
+  )
 
 # STL decomposition
 stl_result <- stl(
   ts(
-    monthly_ratings$review_overall, 
-    frequency = 12, 
+    monthly_ratings$review_overall,
+    frequency = 12,
     start = c(
-      year(min(monthly_ratings$month)), 
-      month(min(monthly_ratings$month)))), 
-  s.window = "periodic")
+      year(min(monthly_ratings$month)),
+      month(min(monthly_ratings$month))
+    )
+  ),
+  s.window = "periodic"
+)
 
 # Plot STL components
 plot(stl_result)
 
+# Ljung-Box test for seasonality
+Box.test(stl_result$time.series[, "remainder"], lag = 12, type = "Ljung-Box")
+
 # Average seasonal effect for each month
-data.frame(
-  month = factor(1:12, labels = month.abb),
-  effect = colMeans(matrix(stl_result$time.series[, 1], ncol = 12, byrow = T))) |> 
-ggplot(aes(x = month, y = effect)) +
-  geom_line(group = 1) +
-  geom_point() +
-  labs(title = "Average Over 12 Months",
-       x = "Month",
-       y = "Average Seasonal Effect")
+monthly_data <-
+  bind_cols(
+    monthly_ratings,
+    data.frame(stl_result$time.series)
+  ) |>
+  mutate(
+    month_name = lubridate::month(month, label = T)
+  )
 
-monthly_data <- 
-bind_cols(
-  monthly_ratings,
-  data.frame(stl_result$time.series))
-
-
-
-monthly_data |> mutate(
-  month_name =  month(month, label = T)) |> 
-  group_by(month_name) |> summarise(
+# Plot
+monthly_data |>
+  group_by(month_name) |>
+  summarise(
     n = sum(review_quantity),
     mean = mean(seasonal),
-    sd = sd(seasonal))
+    sd = sd(seasonal)
+  ) |>
+  ggplot(aes(x = month_name, y = mean)) +
+  geom_line(group = 1) +
+  geom_point() +
+  labs(
+    title = "Average Over 12 Months",
+    x = "Month",
+    y = "Average Seasonal Effect"
+  )
+
+#
+
+# View()
+# profiling_num() |>
+# mutate_if(is.numeric, ~ round(., 3))
+
+```
+
+There is a seasonal cycle, but small: from -0.02 in August to 0.02 in January.\
+The remainder component is the data that can't be explained by the trend + seasonal components.\
+It's centered around zero, which is a good sign. Means that the decomposition has effectively captured the trend and seasonality, leaving behind mostly noise.\
+At the left side - there is more noise, because of less users - so the reviews are more subjective.\
+Ljung-Box test is looking for a significant autocorrelation in remaining unexplained component. p-value = 0.04 means there is still significant seasoning component inside noise.
+
+#### Bootstrap (failed attempt)
+
+```{r}
+#| label: question-five-fail
+#| column: page
+#| warning: false
+#| cache: false
+#| eval: false
+
+library(boot)
+
+# Bootstrap function to resample the seasonal component
+bootstrap_seasonal <- function(data, indices) {
+  sample_data <- data[indices, ]
+  stl_bootstrap <- stl(ts(sample_data$review_overall, frequency = 12), s.window = "periodic")
+  return(stl_bootstrap$time.series[, "seasonal"])
+}
+
+# Apply the bootstrap function
+set.seed(123) # Set seed for reproducibility
+boot_results <- boot(
+  data = monthly_ratings,
+  statistic = bootstrap_seasonal,
+  R = 10000 # Number of bootstrap resamples
+)
+
+# Calculate the confidence intervals
+# Says, the seasonal effect for the whole dataset lies there
+
+boot.ci(boot_results, type = "perc", conf = 0.95)
 
 
 
-  View()
-  profiling_num() |> 
+
+boot_intervals <-
+  boot_results$t |>
+  as_tibble() |>
+  select(1:12) |>
+  profiling_num() |>
+  mutate_if(is.numeric, ~ round(., 5))
+
+
+
+summarise_all(list(~ mean(.), ~ quantile(., 0.025), ~ quantile(., 0.0975))) |> t()
+
+tibble(
+  mean = boot_intervals[1:12, ],
+  CI_lower = boot_intervals[13:24, ],
+  CI_upper = boot_intervals[25:36, ]
+) |>
+  mutate_if(is.numeric, ~ round(., 5))
+
+
+ggplot(aes(x = month_name, y = mean)) +
+  geom_line(group = 1) +
+  geom_point() +
+  labs(
+    title = "Average Over 12 Months",
+    x = "Month",
+    y = "Average Seasonal Effect"
+  )
+
+#
+
+
+tibble(resamples = round(boot_results$t, 5)[1, ]) |>
+  ggplot(aes(x = resamples)) +
+  geom_histogram(binwidth = 0.001, fill = "skyblue", color = "black") +
+  labs(
+    title = "Bootstrap Resamples of January Seasonal Component",
+    x = "Seasonal Component Value",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+
+
+```
+
+Looks loke bootstrap lost some time-series specific relationship, so it just says the things that I already know.\
+Seasoning is within (-0.0253, 0.0233 ) interval.\
+But I want to get something like that:\
+month seasoning_component lower upper\
+Jan 0.02 0.019 0.021\
+Feb 0.017 0.015 0.020
+
+```{r}
+#| label: question-five-fail-two
+#| column: page
+#| warning: false
+#| cache: false
+#| eval: false
+
+# monthly specific CI
+
+
+# Extracting individual confidence intervals for each month
+boot_intervals <- 
+  t(apply(boot_results$t, 2, function(x) {
+    ci <- quantile(x, probs = c(0.025, 0.975))  # 95% confidence interval
+    return(ci)
+  }))
+
+# Convert boot_intervals into a data frame for easier handling
+boot_intervals <- as.data.frame(boot_intervals)
+colnames(boot_intervals) <- c("Lower", "Upper")
+
+# Print the confidence intervals for each month
+print(boot_intervals)
+
+
+```
+
+#### Block bootstrap
+
+```{r}
+#| label: question-five-block-bootstrap
+#| column: page
+#| warning: false
+#| cache: true
+#| eval: false
+
+
+# Block bootstrap with STL
+bootstrap_block <- function(data, indices) {
+  sample <- data[indices, ]
+  monthly_avg <- sample %>%
+    group_by(month) %>%
+    summarise(average_rating = mean(review_overall, na.rm = TRUE))
+
+  stl <- stl(ts(monthly_avg$average_rating, frequency = 12), s.window = "periodic")
+  return(stl$time.series[, "seasonal"])
+}
+
+# Performing block bootstrap
+set.seed(123)
+results <- boot(data = seasoning, statistic = bootstrap_block, R = 1000, sim = "ordinary", stype = "i")
+
+bootstrapping_intervals <-
+  bind_cols(
+    monthly_data |> group_by(month_name) |> summarise(
+      review_overall = mean(review_overall),
+      review_quantity = sum(review_quantity),
+      seasonal = mean(seasonal),
+      trend = mean(trend),
+      remainder = mean(remainder)
+    ),
+    apply(
+      t(results$t)[1:12, ],
+      1,
+      quantile,
+      probs = c(0.025, 0.975)
+    ) %>% t() |> round(3) |> as_tibble()
+  ) |>
   mutate_if(is.numeric, ~ round(., 3))
 
-  
+bootstrapping_intervals |> 
+  select(month_name, review_overall, seasonal, '2.5%', '97.5%', trend)
+
+
+# bootstrapping_intervals |> write_csv("bootstrapping_intervals.csv")
 ```
 
-Wooow, clear visual seasoning, but small.\
-The remainder component is the data that can't be explained by the trend + seasonal components. It's centered around zero, which is a good sign.\
-Means that the decomposition has effectively captured the trend and seasonality, leaving behind mostly noise.
+Even with 1k samples, confidence intervals are not so wide. And the trend is visually visible.
 
 ```{r}
+#| label: question-five-block-bootstrap-plots
+#| column: page
+#| warning: false
+#| cache: true
+#| eval: false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-
-```{r}
-
-# Custom bootstrap function
-bootstrap_custom <- function(x, confidence = 0.95, iterations = 10000) {
-  quantile(
-    bootstrap(x, iterations, mean)$thetastar,
-    c((1 - confidence)/2, 1 - (1 - confidence)/2))}
-
-seasonal_component <- as.vector(decomposition$time.series[,1])
-
-# Bootstrap confidence intervals
-bootstrap_results <- map_dfr(seasonal_component, ~{
-  ci <- bootstrap_custom(.x)
-  tibble(
-    ci_lower = ci[1],
-    ci_upper = ci[2]
-  )
-})
-
-# Add the month and seasonal component to the results using tidyverse functions
-bootstrap_results <- bootstrap_results %>%
-  mutate(
-    month = seasoning$month,
-    seasonal_component = seasonal_component
-  )
-
-ggplot(bootstrap_results, aes(x = month)) +
-  geom_line(aes(y = seasonal_component)) +
-  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), fill = "skyblue", alpha = 0.4) +
+# Error bars
+bootstrapping_intervals %>%
+  select(month_name, seasonal, `2.5%`, `97.5%`) %>%
+  rename(month = month_name, lower = `2.5%`, upper = `97.5%`) |>
+  ggplot(aes(x = month, y = seasonal, group = 1)) +
+  geom_line(color = "blue", size = 0.5) +
+  geom_pointrange(aes(ymin = lower, ymax = upper),
+    color = "darkcyan",
+    size = 0.1,
+    fatten = 4,
+    alpha = 0.8
+  ) +
+  geom_point(color = "black", size = 1.5) +
   labs(
-    title = "Seasonal Component with Pointwise 95% Confidence Intervals",
-    x = "Month",
-    y = "Seasonal Component"
+    title = "Seasonal component with 95% confidence",
+    y = "Value",
+    x = "Month"
+  )
+
+# Ribbon
+bootstrapping_intervals %>%
+  select(month_name, seasonal, `2.5%`, `97.5%`) %>%
+  rename(month = month_name, lower = `2.5%`, upper = `97.5%`) |>
+  ggplot(aes(x = month, y = seasonal, group = 1)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  labs(
+    title = "Seasonal Trend with Confidence Intervals",
+    y = "Value",
+    x = "Month"
   )
 
 ```
+
+#### Conclusion
+
+Bootstrappung under time-series data is tricky.\
+There is small, but solid seasoning 12 month cycles in data within -0.02 to 0.02 range.\
+With the top peak at Jan, and bot at Aug.
+
+**Ways to improve**
+
+Mathematically estimate STL quality: Calculate the proportion of the total variance explained by the seasonal and trend components.\
+Analyze the residuals for autocorrelation, white noise, etc.
+
+Segmentation might be a way

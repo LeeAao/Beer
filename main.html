@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>beer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="main_files/libs/clipboard/clipboard.min.js"></script>
+<script src="main_files/libs/quarto-html/quarto.js"></script>
+<script src="main_files/libs/quarto-html/popper.min.js"></script>
+<script src="main_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="main_files/libs/quarto-html/anchor.min.js"></script>
+<link href="main_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="main_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="main_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="main_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="main_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<script src="main_files/libs/core-js-2.5.3/shim.min.js"></script>
+<script src="main_files/libs/react-17.0.0/react.min.js"></script>
+<script src="main_files/libs/react-17.0.0/react-dom.min.js"></script>
+<script src="main_files/libs/reactwidget-1.0.0/react-tools.js"></script>
+<script src="main_files/libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="main_files/libs/reactable-0.4.4/reactable.css" rel="stylesheet">
+<script src="main_files/libs/reactable-binding-0.4.4/reactable.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#installing-packages" id="toc-installing-packages" class="nav-link active" data-scroll-target="#installing-packages">Installing packages</a></li>
+  <li><a href="#loading-data" id="toc-loading-data" class="nav-link" data-scroll-target="#loading-data">Loading data</a></li>
+  <li><a href="#eda" id="toc-eda" class="nav-link" data-scroll-target="#eda">EDA</a>
+  <ul class="collapse">
+  <li><a href="#step-1---checking-data-health" id="toc-step-1---checking-data-health" class="nav-link" data-scroll-target="#step-1---checking-data-health">Step 1 - Checking data health</a></li>
+  <li><a href="#step-2---univariate-analysis" id="toc-step-2---univariate-analysis" class="nav-link" data-scroll-target="#step-2---univariate-analysis"><strong>Step 2 - Univariate analysis</strong></a></li>
+  <li><a href="#step-3---multivariate-analysis" id="toc-step-3---multivariate-analysis" class="nav-link" data-scroll-target="#step-3---multivariate-analysis"><strong>Step 3 - Multivariate analysis</strong></a></li>
+  </ul></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a>
+  <ul class="collapse">
+  <li><a href="#which-brewery-produces-the-strongest-beers-by-abv" id="toc-which-brewery-produces-the-strongest-beers-by-abv" class="nav-link" data-scroll-target="#which-brewery-produces-the-strongest-beers-by-abv">1. Which brewery produces the strongest beers by ABV%?</a></li>
+  <li><a href="#if-you-had-to-pick-3-beers-to-recommend-using-only-this-data-which-would-you-pick" id="toc-if-you-had-to-pick-3-beers-to-recommend-using-only-this-data-which-would-you-pick" class="nav-link" data-scroll-target="#if-you-had-to-pick-3-beers-to-recommend-using-only-this-data-which-would-you-pick">2. If you had to pick 3 beers to recommend using only this data, which would you pick?</a></li>
+  <li><a href="#which-of-the-factors-aroma-taste-appearance-palette-are-most-important-in-determining-the-overall-quality-of-a-beer" id="toc-which-of-the-factors-aroma-taste-appearance-palette-are-most-important-in-determining-the-overall-quality-of-a-beer" class="nav-link" data-scroll-target="#which-of-the-factors-aroma-taste-appearance-palette-are-most-important-in-determining-the-overall-quality-of-a-beer">3. Which of the factors (aroma, taste, appearance, palette) are most important in determining the overall quality of a beer?</a></li>
+  <li><a href="#if-i-typically-enjoy-a-beer-due-to-its-aroma-and-appearance-which-beer-style-should-i-try" id="toc-if-i-typically-enjoy-a-beer-due-to-its-aroma-and-appearance-which-beer-style-should-i-try" class="nav-link" data-scroll-target="#if-i-typically-enjoy-a-beer-due-to-its-aroma-and-appearance-which-beer-style-should-i-try">4. If I typically enjoy a beer due to its aroma and appearance, which beer style should I try?</a></li>
+  <li><a href="#use-bootstrapping-to-investigate-if-there-is-seasonality-in-the-overall-ratings." id="toc-use-bootstrapping-to-investigate-if-there-is-seasonality-in-the-overall-ratings." class="nav-link" data-scroll-target="#use-bootstrapping-to-investigate-if-there-is-seasonality-in-the-overall-ratings.">5. Use bootstrapping to investigate if there is seasonality in the overall ratings.</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">beer</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="installing-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-packages">Installing packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to install and load packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>install_and_load_packages <span class="ot">&lt;-</span> <span class="cf">function</span>(packages) {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (package <span class="cf">in</span> packages) {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(package, <span class="at">character.only =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">install.packages</span>(package)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">require</span>(package, <span class="at">character.only =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">install_and_load_packages</span>(<span class="fu">c</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyverse"</span>, <span class="st">"reactable"</span>, <span class="st">"DT"</span>, <span class="st">"skimr"</span>, <span class="st">"gt"</span>, <span class="st">"gtExtras"</span>, <span class="st">"styler"</span>, <span class="st">"kableExtra"</span>, <span class="st">"forecast"</span>, <span class="st">"bootstrap"</span>, <span class="st">"zoo"</span>, <span class="st">"Hmisc"</span>, <span class="st">"ROCR"</span>, <span class="st">"gridExtra"</span>, <span class="st">"pander"</span>, <span class="st">"reshape2"</span>, <span class="st">"lazyeval"</span>, <span class="st">"moments"</span>, <span class="st">"entropy"</span>, <span class="st">"corrplot"</span>, <span class="st">"boot"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("https://cran.r-project.org/src/contrib/Archive/funModeling/funModeling_1.9.4.tar.gz", repos = NULL, type = "source")</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(funModeling)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(install_and_load_packages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="loading-data" class="level2">
+<h2 class="anchored" data-anchor-id="loading-data">Loading data</h2>
+<div class="cell" data-hash="main_cache/html/reading-csv_d36c43981ce670f24316fbf1f14dac9f">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"beer_reviews.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># data %&gt;% spec()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We have an almost 200mb file with over 1kk observations. This fits working memory as it is, so no need to use DT or paralellisation.</p>
+</section>
+<section id="eda" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="eda">EDA</h2>
+<p>My <strong>goal</strong> is to gradually develop an understanding of my data. I’ll approach it by doing cycles of asking questions, trying to answer them and generating a new questions along the way.<br>
+The key here is to <strong>find good questions to ask</strong>, which I know I don’t know so far. So it will be a creative process of searching and utilizing a help of a frameworks, so I can be sure to not get lost in the process.</p>
+<p>My usual framework is to cover at least a basic questions and investigate some anomalies I’m noticing along the way.</p>
+<section id="step-1---checking-data-health" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-1---checking-data-health">Step 1 - Checking data health</h3>
+<p>At this stage, I have 2 general questions:</p>
+<ol type="1">
+<li>What this data is about?</li>
+<li>Is the data good enough to be used?</li>
+</ol>
+<div class="cell page-columns page-full" data-hash="main_cache/html/health-check_72c61e1608b9bd5f30ab5bd865cc598a">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">status</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="fu">contains</span>(<span class="st">"inf"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    data <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">20</span>) <span class="sc">|&gt;</span> <span class="fu">t</span>() <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unite</span>(<span class="st">"glimpse"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="at">sep =</span> <span class="st">", "</span>, <span class="at">remove =</span> T, <span class="at">na.rm =</span> T) <span class="sc">|&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">glimpse =</span> <span class="fu">str_trunc</span>(glimpse, <span class="at">width =</span> <span class="dv">29</span>, ))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">remove_rownames</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  reactable<span class="sc">::</span><span class="fu">reactable</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">resizable =</span> T,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">wrap =</span> F,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">bordered =</span> F,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">defaultPageSize =</span> <span class="dv">50</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="dv">500</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+
+<div id="htmlwidget-89b6b4f926d4eac14708" class="reactable html-widget " style="width:auto;height:500px;"></div>
+<script type="application/json" data-for="htmlwidget-89b6b4f926d4eac14708">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"variable":["brewery_id","brewery_name","review_time","review_overall","review_aroma","review_appearance","review_profilename","beer_style","review_palate","review_taste","beer_name","beer_abv","beer_beerid"],"q_zeros":[0,0,0,7,0,7,0,0,0,0,0,0,0],"p_zeros":[0,0,0,0,0,0,0,0,0,0,0,0,0],"q_na":[0,15,0,0,0,0,348,0,0,0,0,67785,0],"p_na":[0,0,0,0,0,0,0.0002,0,0,0,0,0.0427,0],"type":["numeric","character","numeric","numeric","numeric","numeric","character","character","numeric","numeric","character","numeric","numeric"],"unique":[5840,5742,1577960,10,9,10,33387,104,9,9,56857,530,66055],"glimpse":["10325, 10325, 10325, 10325...","Vecchio Birraio, Vecchio B...","1234817823, 1235915097, 12...","1.5, 3.0, 3.0, 3.0, 4.0, 3...","2.0, 2.5, 2.5, 3.0, 4.5, 3...","2.5, 3.0, 3.0, 3.5, 4.0, 3...","stcules, stcules, stcules,...","Hefeweizen, English Strong...","1.5, 3.0, 3.0, 2.5, 4.0, 3...","1.5, 3.0, 3.0, 3.0, 4.5, 3...","Sausa Weizen, Red Moon, Bl...","5.0, 6.2, 6.5, 5.0, 7.7, 4...","47986, 48213, 48215, 47969..."]},"columns":[{"id":"variable","name":"variable","type":"character"},{"id":"q_zeros","name":"q_zeros","type":"numeric"},{"id":"p_zeros","name":"p_zeros","type":"numeric"},{"id":"q_na","name":"q_na","type":"numeric"},{"id":"p_na","name":"p_na","type":"numeric"},{"id":"type","name":"type","type":"character"},{"id":"unique","name":"unique","type":"numeric"},{"id":"glimpse","name":"glimpse","type":"character"}],"resizable":true,"defaultPageSize":50,"nowrap":true,"height":"500px","dataKey":"ec4b76883cab5b5587952268b1038036"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<section id="variables" class="level4">
+<h4 class="anchored" data-anchor-id="variables"><strong>1. Variables</strong></h4>
+<p>Get a first glimpse of the data, to form a basic understanding of variables.<br>
+Lets group and describe variables:<br>
+<br>
+So this data is about</p>
+<ul>
+<li><p>Breweries<br>
+brewery_id - !fix to char<br>
+brewery_name - <strong>There is 5k+ different breweries</strong>, !fix NA</p></li>
+<li><p>Their beer<br>
+beer_style - <strong>And 100+ different types of beer</strong><br>
+beer_name - <strong>With 50k+ trademarks</strong><br>
+beer_beerid -!fix to char<br>
+beer_abv - alcohol by volume, the higher, the more alcoholic the drink, !fix NA 4%</p></li>
+<li><p>And user reviews<br>
+review_profilename - userid, <strong>Scored by 33k users</strong>, !fix NA<br>
+review_time - !fix to posix<br>
+review_overall - !fix zeros, seems like a bug from a single user, <strong>In 4 categories + weighted main score</strong><br>
+review_aroma<br>
+review_appearance - !fix zeros<br>
+review_palate - the way it feels going down (carbonation, mouthfeel, alcohol profile and texture)<br>
+review_taste</p></li>
+</ul>
+<p><strong>Summary</strong>:</p>
+<p>Its a pretty compact data about Breweries, Beer and Reviews. With Cat and Num vars. Dont need to much cleaning, cool.</p>
+<p>Basic understanding - done</p>
+</section>
+<section id="data-health" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="data-health"><strong>2. Data health</strong></h4>
+<p>What is healthy data? Here is my framework:</p>
+<ul>
+<li>Import errors - wrong delimiters, missing colnames, footnotes or appendix, wrong encoding</li>
+<li>Data types - wrong date formats, char instead of numeric, unneeded lists</li>
+<li>Data quality - inconsistency in Tidy structure, missing data, unusual NAs or 0s, bad naming, duplicates</li>
+<li>Complex variables - high cardinality, parameters for split, “other” category</li>
+</ul>
+<div class="cell column-page" data-hash="main_cache/html/health-check-integrity_1c15cc4e2d58e856cbe92e643d2a5c2b">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">data_integrity</span>() <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+◌ {Numerical with NA} beer_abv
+◌ {Categorical with NA} review_profilename, brewery_name
+ⓞ {High cardinality (MAX_UNIQUE &gt; 35)} beer_name, review_profilename, brewery_name, beer_style</code></pre>
+</div>
+</div>
+<p>- brewery_id - !fix to char<br>
++ brewery_name - !fix NA<br>
+- beer_beerid -!fix to char<br>
++ beer_abv - !fix NA 4%<br>
++ review_profilename - !fix NA<br>
++ review_time - !fix to posix<br>
++ review_overall - !fix zeros, seems like a bug from a single user, !fix multiple observations per single beer<br>
++ review_appearance - !fix zeros</p>
+<div class="cell column-page" data-hash="main_cache/html/health-check-cleaning_7591ffb41d36782809a7e4eee066825d">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fixing Vars order, NAs, Zeros, Dates</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    brewery_id, brewery_name,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    beer_style, beer_name, beer_beerid, beer_abv,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    review_profilename, review_time,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    review_overall, review_aroma, review_appearance, review_palate, review_taste</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(review_overall <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">review_time =</span> <span class="fu">as_datetime</span>(review_time))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Fixing multiple observations per single beer. Using Arrange + Slice to pick the last score</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(review_time)) <span class="sc">|&gt;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(review_profilename, beer_name) <span class="sc">|&gt;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing ID</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(brewery_id, beer_beerid))</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co"># data |&gt; write_csv("data.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I’m just cutting out all NAs, since its not so much of a loss (4% of data), but saves me a lot of time.<br>
+High cardinality is aligned with the nature of data, I can keep it the same untill I need more advanced feature engineering.<br>
+Some users are reviewing the same beer multiple times, ill just pick the last score and cut the older ones.<br>
+Why there are brewery_id and brewery_name? Are duplicating each other? Same for the beer. Some names can be not unique, ~15% of beernames. Want to do a quickest solution here - just ignore IDs.</p>
+<p>Health is fine now - done</p>
+</section>
+<section id="conclusion" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion"><strong>3. Conclusion</strong></h4>
+<p>I’ve got the basic understanding of the data, cleaned it and now I can move on to the analysis.</p>
+</section>
+</section>
+<section id="step-2---univariate-analysis" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-2---univariate-analysis"><strong>Step 2 - Univariate analysis</strong></h3>
+<p>What type of variation occurs within my variables?</p>
+<ol type="1">
+<li>What are the typical values?</li>
+<li>Is there any visible clusters?</li>
+<li>Is there outliers?</li>
+</ol>
+<p>To answer those, I’ll use descriptive statistics to get central tendency, spread and distribution shape.<br>
+Distribution for num, Frequencies for cat.<br>
+Also data visualisation is useful because its easy to miss something in a table full of values.</p>
+<section id="typical-values" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="typical-values"><strong>1. Typical values</strong></h4>
+<p>For every var, I’ll quickly go with this questions:</p>
+<ul>
+<li>Which values are the most common/rare? Why?</li>
+<li>Any unusual patterns? Possible explanations?</li>
+</ul>
+<p><strong>For numerical variables:</strong><br>
+Sadly my laptop cant handle the usual approach im using: building a descriptive statistics for each variable and combining it with distribution plots inside a single table.</p>
+<div class="cell column-page" data-hash="main_cache/html/univar-numeric_6bbbde341032e9a3fafe237db9b235ed">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Building a table that combines descriptive stats and barplots to check for distribution shapes.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom function to gather stats</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>extended_skim <span class="ot">&lt;-</span> <span class="fu">skim_with</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">numeric =</span> <span class="fu">sfl</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># iqr = IQR,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># variation_coef = ~ sd(.x, na.rm = T) / mean(.x, na.rm = T),  # CV</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># new_hist = ~ inline_hist(.x, n_bins = 10),  # Add more bins to a default hist</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">hist =</span> <span class="cn">NULL</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># factor = sfl(missing = ~ sum(is.na(.))),  #</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">append =</span> T</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>data_descriptive_numerical <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(review_time)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_all</span>(<span class="sc">~</span> <span class="fu">ifelse</span>(. <span class="sc">==</span> <span class="dv">0</span>, <span class="cn">NA</span>, .)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="sc">~</span> .x[<span class="sc">!</span><span class="fu">is.na</span>(.x)]) <span class="sc">%&gt;%</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"Column"</span>, <span class="at">value =</span> <span class="st">"Values"</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>data_descriptive_skim <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(review_time)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extended_skim</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">yank</span>(<span class="st">"numeric"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, round, <span class="dv">1</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>data_descriptive_merged <span class="ot">&lt;-</span> </span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    data_descriptive_numerical,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    data_descriptive_skim,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Column"</span> <span class="ot">=</span> <span class="st">"skim_variable"</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(Values, <span class="at">.after =</span> p100)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>data_descriptive_merged <span class="sc">|&gt;</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt_plt_dist</span>(</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    Values,</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"histogram"</span>,</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">same_limit =</span> F,</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">fig_dim =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">100</span>),</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">trim =</span> T</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is a quick workaround.</p>
+<div class="cell column-page" data-hash="main_cache/html/univar-numeric-descriptive_7efe01aa1b0b58c235af770f8ad7b52f">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Descriptive stats + barplots</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">profiling_num</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(variable, mean, std_dev, p_50, range_98) <span class="sc">|&gt;</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, round, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           variable mean std_dev p_50  range_98
+1          beer_abv 7.05    2.33  6.5 [3.9, 14]
+2    review_overall 3.82    0.72  4.0  [1.5, 5]
+3      review_aroma 3.75    0.70  4.0  [1.5, 5]
+4 review_appearance 3.85    0.61  4.0    [2, 5]
+5     review_palate 3.75    0.68  4.0  [1.5, 5]
+6      review_taste 3.80    0.73  4.0  [1.5, 5]</code></pre>
+</div>
+</div>
+<p>Descriptive statistics and distribution plots.</p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/univar-numeric-distribution_7f419296d25bcd150812db620c0a2cf5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean theme</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">theme</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="st">"cm"</span>), <span class="co"># Прижимает всю картинку к краю</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">size =</span> <span class="fl">0.5</span>, <span class="at">colour =</span> <span class="st">"grey80"</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">10</span>), <span class="co"># Центрирует заголовок</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.1</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.1</span>),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">linetype =</span> <span class="st">"blank"</span>),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">linetype =</span> <span class="st">"blank"</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"white"</span>),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">colour =</span> <span class="cn">NA</span>)))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Hists for reviews</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(review_time, beer_abv)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_num</span>(<span class="at">bins =</span> <span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/univar-numeric-distribution-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># You cant score 0 or 0.5, so 9 bins</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Hist for ABV </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(beer_abv)) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">colour =</span> <span class="st">'#00E5EE'</span>, <span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">fill =</span> <span class="st">'#00E5EE'</span>, <span class="at">bins =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/univar-numeric-distribution-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Reviews distributions looks the same - skewed right, with peaks at 4.<br>
+5 stars is quite rare, relative to the rest scores. I’m guessing that the users <strong>really</strong> likes the 5 beers.<br>
+ABV is different, skewed left, mostly (90%) lower than 10. With a tail of a much more alcoholic beers.<br>
+Tho I need to group by beer to not count same beer ABV from different users.</p>
+<p><strong>For categorical variables:</strong></p>
+<p>I’m using a Skimr to get an idea of the var levels.</p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/univar-cat_fd1e4b021ffd47b0903f8988c601702c">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom function to gather stats</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>extended_skim <span class="ot">&lt;-</span> <span class="fu">skim_with</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">numeric =</span> <span class="fu">sfl</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># iqr = IQR,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># variation_coef = ~ sd(.x, na.rm = T) / mean(.x, na.rm = T),  # CV</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># new_hist = ~ inline_hist(.x, n_bins = 10),  # Add more bins to a default hist</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">hist =</span> <span class="cn">NULL</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># factor = sfl(missing = ~ sum(is.na(.))),  #</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">append =</span> T</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extended_skim</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">yank</span>(<span class="st">"character"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><strong>Variable type: character</strong></p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+max
+</th>
+<th style="text-align:right;">
+empty
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:right;">
+whitespace
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+brewery_name
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5145
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beer_style
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beer_name
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+44075
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+review_profilename
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+32908
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extended_skim</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">yank</span>(<span class="st">"POSIXct"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><strong>Variable type: POSIXct</strong></p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:left;">
+min
+</th>
+<th style="text-align:left;">
+max
+</th>
+<th style="text-align:left;">
+median
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+review_time
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1998-01-10 00:00:01
+</td>
+<td style="text-align:left;">
+2012-01-11 12:35:48
+</td>
+<td style="text-align:left;">
+2009-04-27 06:37:02
+</td>
+<td style="text-align:right;">
+1488436
+</td>
+</tr>
+</tbody>
+
+</table>
+</div>
+</div>
+<p>Building a frequency tables using funModeling. Skipping plots, because too much unique values.</p>
+<div class="cell column-page" data-hash="main_cache/html/univar-cat-freq_9e090cdf8ed494f7bda02519bf87c157">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">freq</span>(data, <span class="at">plot =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Most frequent names are:<br>
+Brewery - Boston Beer Company, 2.58% of all reviews<br>
+Beer style - American IPA, 7.39%<br>
+Beer - 90 Minute IPA, 0.21%<br>
+Top user reviewed over 5k beers</p>
+</section>
+<section id="visual-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="visual-clusters"><strong>2. Visual clusters</strong></h4>
+<p>Skipping to save time</p>
+</section>
+<section id="outliers" class="level4">
+<h4 class="anchored" data-anchor-id="outliers"><strong>3. Outliers</strong></h4>
+<p>Skipping to save time</p>
+</section>
+<section id="conclusion-1" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-1"><strong>4. Conclusion</strong></h4>
+<p>This data is about craft beers and hardcore beer lovers, not Heineken grocery store beers.</p>
+<p>The scores distributed pretty meaningfull - most beers are OK (score 4), and just plenty are the ones that people really like (score 5).<br>
+I’m curious what makes the difference between 4 and 5. Is it just random, or there is real factors that makes the beer the best one you’ve tried.</p>
+<p>There is a good variety of beers and beer styles (100+) by many breweries and reviewers. With the nice diversity at top.<br>
+Some reviewers I can call a Power Users, because they had thousands of beers reviewed.</p>
+<p>Nex step, i’m interested to dive deeper into data.</p>
+</section>
+</section>
+<section id="step-3---multivariate-analysis" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-3---multivariate-analysis"><strong>Step 3 - Multivariate analysis</strong></h3>
+<p>What is <strong>my goal</strong> here? In a formal way its this: what type of covariation occurs between my variables?<br>
+Covariation is the tendency for variables to vary together in a related way. Visualization is a good way to spot it.<br>
+So, I’m looking for some visual <strong>indicators of a relationships</strong> or dependencies in data.</p>
+<p>For different data types, there is different approaches:</p>
+<ol type="1">
+<li>Comparing Num vs Num, using correlations heatmap and scatterplots</li>
+<li>Comparing Cat vs Num, using boxplots/violins</li>
+<li>Comparing Cat vs Cat, using contigency tables</li>
+</ol>
+<section id="correlations" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="correlations"><strong>1. Correlations</strong></h4>
+<p>Best way to get the ideas about the relationships in numeric vars - is visually heat-mapping a corr matrix.</p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/multivar-corr_3b6128da8b1d97a2934123a6d6783eed">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute correlation matrix using Spearman's correlation</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">method =</span> <span class="st">"spearman"</span>, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> <span class="fu">round</span>(correlation_matrix <span class="sc">*</span> <span class="dv">10</span>, <span class="dv">1</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create correlation heatmap</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>corrplot<span class="sc">::</span><span class="fu">corrplot</span>(</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  correlation_matrix,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"color"</span>, <span class="at">type =</span> <span class="st">"full"</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># order = "hclust",</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">addCoef.col =</span> <span class="st">"black"</span>, <span class="at">tl.col =</span> <span class="st">"black"</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">tl.srt =</span> <span class="dv">45</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">number.cex =</span> <span class="fl">0.8</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">tl.cex =</span> <span class="fl">0.6</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">is.corr =</span> F</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/multivar-corr-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(correlation_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Beer ABV not correlated much with overall score. This can be interesting to see, how this corr differs accross more experienced users and less.<br>
+Aroma and appearance are slightly less correlated with score, than Palate and Taste. Might be less important?</p>
+</section>
+<section id="boxplots" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="boxplots"><strong>2. Boxplots</strong></h4>
+<p><strong>Score per Style</strong></p>
+<div class="cell column-page" data-hash="main_cache/html/multivar-styles_a387050f0041cde1e3a5453a426a8b11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scores for most reviewed styles</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>popular_styles <span class="ot">&lt;-</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(review_overall, beer_style) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_style) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_score =</span> <span class="fu">mean</span>(review_overall) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantity =</span> <span class="fu">n</span>(),</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>quantity)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>popular_styles</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>popular_styles_top <span class="ot">&lt;-</span> popular_styles<span class="sc">$</span>beer_style <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(beer_style <span class="sc">%in%</span> popular_styles_top) <span class="sc">|&gt;</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> review_overall, <span class="at">y =</span> beer_style)) <span class="sc">+</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Score"</span>, <span class="at">y =</span> <span class="st">"Style"</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Best rated beers</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>popular_styles <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="sc">-</span>mean_score)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(popular_styles)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Doesn’t looks like much. Fruit / Vegetable Beers seems worse than the rest.<br>
+To get more from this visual, need to use error bars with con intervals for means. And look for the best rated styles instead of popular.<br>
+For top rated beers, there is very low difference (less than 1%) between mean score. So can say for sure which is better.</p>
+<p><strong>Reviews per Beer</strong></p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/multivar-beers_c1e7564ca3d3469fee4711cadf9c963b">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>reviews_per_beer <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_name) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">quantity =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>reviews_per_beer <span class="sc">|&gt;</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> quantity)) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">colour =</span> <span class="st">'#00E5EE'</span>, <span class="at">fill =</span> <span class="st">'#00E5EE'</span>, <span class="at">binwidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Reviews"</span>, <span class="at">y =</span> <span class="st">"Beers"</span>) <span class="sc">+</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/multivar-beers-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(reviews_per_beer<span class="sc">$</span>quantity, <span class="at">probs =</span> <span class="fu">seq</span>(<span class="fl">0.15</span>, <span class="dv">1</span>, <span class="fl">0.05</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80%  85%  90% 
+   1    1    1    1    2    2    3    3    4    5    6    8   12   18   31   59 
+ 95% 100% 
+ 151 3206 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(reviews_per_beer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<pre><code>15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80%  85%  90%  95% 100%     
+  1    1    1    1    2    2    3    3    4    5    6    8   12   18   31   59  151 3206</code></pre>
+<p>So, median is 3, means there is <strong>a lot of</strong> rare beers. More percisely, beers that almost noone reviewed.<br>
+Looks bad, because I don’t really know I can trust those reviews.<br>
+Possible ways to fix it - google / pick threashold random / find fitting stat test …. ???</p>
+<p><strong>Beers per brewery</strong></p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/multivar-brew_9bb4e225427a59422bb13461e6a45dd7">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>beers_per_brewery <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(brewery_name) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">quantity =</span> <span class="fu">n_distinct</span>(beer_name), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>beers_per_brewery <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> quantity)) <span class="sc">+</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">colour =</span> <span class="st">"#00E5EE"</span>, <span class="at">fill =</span> <span class="st">"#00E5EE"</span>, <span class="at">binwidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Beers"</span>, <span class="at">y =</span> <span class="st">"Breweries"</span>) <span class="sc">+</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/multivar-brew-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(beers_per_brewery<span class="sc">$</span>quantity, <span class="at">probs =</span> <span class="fu">seq</span>(<span class="fl">0.05</span>, <span class="dv">1</span>, <span class="fl">0.05</span>)) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  5%  10%  15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80% 
+   1    1    1    1    2    2    3    3    4    4    5    6    7    9   10   12 
+ 85%  90%  95% 100% 
+  16   22   34  521 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(beers_per_brewery)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<pre><code>  5%  10%  15%  20%  25%  30%  35%  40%  45%  50%  55%  60%  65%  70%  75%  80%  85%  90%  95% 100%     
+   1    1    1    1    2    2    3    3    4    4    5    6    7    9   10   12   16   22   34  521 </code></pre>
+<p>Many rare breweries with just a couple of beers. Might be OK, if a brewery produces just one or two sorts, but nailed it.</p>
+</section>
+<section id="cat-vs-cat-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="cat-vs-cat-analysis"><strong>3. Cat vs Cat analysis</strong></h4>
+<p>Skip&nbsp;</p>
+</section>
+<section id="conclusion-2" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-2"><strong>4. Conclusion</strong></h4>
+<p>ABV is probably not super important, because it doesn’t correlates well with the score.<br>
+I need to deal with the question: can I trust scores with low number of reviewers? Half of the 50k of beers been reviewed by 1-3 users.<br>
+</p>
+</section>
+</section>
+</section>
+<section id="questions" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="questions">Questions</h2>
+<section id="which-brewery-produces-the-strongest-beers-by-abv" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="which-brewery-produces-the-strongest-beers-by-abv">1. Which brewery produces the strongest beers by ABV%?</h3>
+<p>This question is a bit tricky because of the <strong>2 possible interpretations:</strong><br>
+- What is the typical strength of this brewery beers? (1 strong + 9 light scores brewery as low typical ABV)<br>
+- Who is capable to produce extremely strong beer? (1 strong + 9 light scores brewery as high absolute ABV)</p>
+<p><strong>What is the typical strength of this brewery beers?</strong></p>
+<p>Some disclaimers:<br>
+I’m using median, because its less sensitive to a big outliers, so “typical” by median is more precise.<br>
+Decided not to exclude low-variety breweries, because the dataset spans across 14 years. And if a brewery has just one beer so far, then its just on beer. You guys had 14 years to discover more &gt;_&lt;</p>
+<div class="cell page-columns page-full" data-hash="main_cache/html/question-one_76d1946472125ebae4eb8999e7e60d2f">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Updated code for horizontal barplot</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(brewery_name) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_abv =</span> <span class="fu">mean</span>(beer_abv) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">1</span>),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantity =</span> <span class="fu">n</span>(),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>median_abv) <span class="sc">|&gt;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">15</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(brewery_name, median_abv), <span class="at">y =</span> median_abv)) <span class="sc">+</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#00E5EE"</span>) <span class="sc">+</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Brewery"</span>, <span class="at">y =</span> <span class="st">"ABV"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/question-one-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># So thats our dudes</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(brewery_name <span class="sc">==</span> <span class="st">"Schorschbräu"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(beer_name, beer_abv) <span class="sc">|&gt;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>beer_abv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   beer_name                     beer_abv
+   &lt;chr&gt;                            &lt;dbl&gt;
+ 1 Schorschbräu Schorschbock 57%     57.7
+ 2 Schorschbräu Schorschbock 43%     43  
+ 3 Schorschbräu Schorschbock 40%     39.4
+ 4 Schorschbräu Schorschbock 31%     30.9
+ 5 Schorschbock                      16  
+ 6 Schorsch Weizen 16%               16  
+ 7 Schorschbräu Donner Weizen        13  
+ 8 Schorschbräu Donner Bock          13  
+ 9 Schorschbock Ice 13               13  
+10 Schorschbräu Dunkles               4.9</code></pre>
+</div>
+</div>
+<p>Schorschbräu it is.</p>
+<p><strong>Who is capable to produce extremely strong beer?</strong></p>
+<div class="cell column-page" data-hash="main_cache/html/question-one-alternative_768981dedafb71e764f4a80d5f7ef874">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>beer_abv) <span class="sc">|&gt;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(brewery_name) <span class="sc">|&gt;</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(brewery_name, beer_name, beer_abv) <span class="sc">|&gt;</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>beer_abv) <span class="sc">|&gt;</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   brewery_name                                               beer_name beer_abv
+   &lt;chr&gt;                                                      &lt;chr&gt;        &lt;dbl&gt;
+ 1 Schorschbräu                                               Schorsch…     57.7
+ 2 BrewDog                                                    Sink The…     41  
+ 3 De Struise Brouwers                                        Black Da…     39  
+ 4 Hair of the Dog Brewing Company / Brewery and Tasting Room Dave          29  
+ 5 Boston Beer Company (Samuel Adams)                         Samuel A…     27  
+ 6 LagerHaus Grill &amp; Brewery                                  44 Magnum     22  
+ 7 DuClaw Brewing Company                                     Colossus      21.9
+ 8 Grand Lake Brewing Company                                 Holy Gra…     20  
+ 9 Short's Brewing Company                                    Short's …     20  
+10 BFM Brasserie Des Franches-Montagnes                       Cuvée Al…     19.5</code></pre>
+</div>
+</div>
+<section id="conclusion-3" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-3"><strong>Conclusion</strong></h4>
+<p>Strongest beer by brewery. Aaaand, same dudes on top here &gt;_&lt;<br>
+Schorschbräu Schorschbock 57%, is this even a beer?!</p>
+<p><strong>Ways to improve</strong></p>
+<p>Mark the low variety breweries. Or filter them out.<br>
+Google what AVB considering strong.<br>
+… something else.</p>
+</section>
+</section>
+<section id="if-you-had-to-pick-3-beers-to-recommend-using-only-this-data-which-would-you-pick" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="if-you-had-to-pick-3-beers-to-recommend-using-only-this-data-which-would-you-pick">2. If you had to pick 3 beers to recommend using only this data, which would you pick?</h3>
+<p>I can see <strong>2 major ways</strong> I can solve this problem. With even more smaller options for each one.</p>
+<p><strong>First</strong> - is to focus on recommending a beers based on personal preferences.</p>
+<p>This approach is abount building a recommendation model based on Collaborative Filtering.<br>
+Finding similarities between users or their behavior, and describing them as factors:<br>
+there is users who likes fruits beers, or beers of specific region or year, maybe users who like try new tastes.. etc.</p>
+<p>Basic implementations are:<br>
+- Auto-Encoders (more flexible, but compute heavy)<br>
+- Matrix Factorization (SVD, ALS) (more interpretable, but linear)</p>
+<p>Pros: if I know a user preferences, I can recommend a cool beer to try, those models are pretty powerfull<br>
+Cons: not so easy to implement + need good data<br>
+<strong>Conclusion:</strong> by my experience, its easy to build such model, but too risky when you are low on time.<br>
+First model wont work well 90% of the times. At least a couple of feature ingeneering / parameters tweaking iterations needed to get good results.</p>
+<p><strong>Second</strong> - is to focus on average best-fit-for-anybody score.</p>
+<p>Here we are looking for some metrics, averaging them and picking the beers that happened to be on top.</p>
+<p>What possible approaches I see:<br>
+- Simple: Just pick top-rated beers. Might be biased, due to personal preferences and lacking enough reviews.<br>
+- Weigted: Use weighted score by many factors. Solves the robustness issue, but gives you average results.<br>
+- Expert-oriented: Find most experienced reviewers and see their recent top beers. Bias towards experts tastes.</p>
+<p>Pros: I can make this in time and be confident to get OK result<br>
+Cons: can’t be confident enough, because there is no clear utility function i can use to validate results<br>
+<strong>Conclusion:</strong> less risky, but lower quality of recomendations</p>
+<p>Gonna use Weighted approach. I’m aiming for recommending a solid good beer, not finding a 100% best beer of your life.<br>
+Factors and weights will be:<br>
+- beer_rating: 0.4 (review_overall)<br>
+- beer_popularity: 0.1<br>
+- rating_consistency: 0.1 (low deviation in taste, aroma, appearance, palate)<br>
+- brewery_popularity: 0.1<br>
+- brewery_rating: 0.1<br>
+- style_popularity: 0.1<br>
+- style_rating: 0.1<br>
+- reviews_quality: 0 (recency, diversity of reviewers, experience of reviewers)</p>
+<div class="cell column-page" data-hash="main_cache/html/question-two_cdec78fca663cc43378b1fc0dd963206">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating factors</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rating_consistency =</span> <span class="fu">sd</span>(<span class="fu">c</span>(review_taste, review_aroma, review_appearance, review_palate))) <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_name) <span class="sc">%&gt;%</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">beer_popularity =</span> <span class="fu">n</span>(),</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">beer_rating =</span> <span class="fu">mean</span>(review_overall),</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">rating_consistency =</span> <span class="fu">mean</span>(rating_consistency)</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(brewery_name) <span class="sc">%&gt;%</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">brewery_popularity =</span> <span class="fu">n</span>(),</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">brewery_rating =</span> <span class="fu">mean</span>(review_overall)</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_style) <span class="sc">%&gt;%</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">style_popularity =</span> <span class="fu">n</span>(),</span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">style_rating =</span> <span class="fu">mean</span>(review_overall)</span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Min-max normalization to 0-1 scale</span></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(</span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>        beer_rating, beer_popularity, rating_consistency,</span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>        brewery_popularity, brewery_rating,</span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>        style_popularity, style_rating</span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>      <span class="sc">~</span> (.x <span class="sc">-</span> <span class="fu">min</span>(.x)) <span class="sc">/</span> (<span class="fu">max</span>(.x) <span class="sc">-</span> <span class="fu">min</span>(.x)),</span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">.names =</span> <span class="st">"n_{.col}"</span></span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_rating_consistency =</span> <span class="dv">1</span> <span class="sc">-</span> n_rating_consistency) <span class="co"># fix lower is better</span></span>
+<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Weighted score for each beer</span></span>
+<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a>recomended_beers <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_name) <span class="sc">|&gt;</span></span>
+<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
+<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">weighted_score =</span> <span class="fu">sum</span>(</span>
+<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c_across</span>(<span class="fu">starts_with</span>(<span class="st">"n_"</span>)) <span class="sc">*</span></span>
+<span id="cb33-52"><a href="#cb33-52" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>)</span>
+<span id="cb33-53"><a href="#cb33-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-54"><a href="#cb33-54" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb33-55"><a href="#cb33-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-56"><a href="#cb33-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>weighted_score) <span class="sc">%&gt;%</span></span>
+<span id="cb33-57"><a href="#cb33-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb33-58"><a href="#cb33-58" aria-hidden="true" tabindex="-1"></a>    brewery_name, beer_style, beer_name,</span>
+<span id="cb33-59"><a href="#cb33-59" aria-hidden="true" tabindex="-1"></a>    weighted_score, beer_abv, beer_popularity, beer_rating,</span>
+<span id="cb33-60"><a href="#cb33-60" aria-hidden="true" tabindex="-1"></a>    brewery_popularity, brewery_rating, style_popularity, style_rating</span>
+<span id="cb33-61"><a href="#cb33-61" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb33-62"><a href="#cb33-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-63"><a href="#cb33-63" aria-hidden="true" tabindex="-1"></a>recomended_beers <span class="sc">|&gt;</span></span>
+<span id="cb33-64"><a href="#cb33-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(beer_popularity <span class="sc">&gt;</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb33-65"><a href="#cb33-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>) <span class="sc">|&gt;</span></span>
+<span id="cb33-66"><a href="#cb33-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 20 × 11
+   brewery_name     beer_style beer_name weighted_score beer_abv beer_popularity
+   &lt;chr&gt;            &lt;chr&gt;      &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;           &lt;dbl&gt;
+ 1 Stone Brewing C… American … Stone IP…           0.84      6.9            2526
+ 2 Sierra Nevada B… American … Sierra N…           0.83      6.8            2929
+ 3 Bell's Brewery,… American … Two Hear…           0.82      7              2631
+ 4 Dogfish Head Br… American … 60 Minut…           0.82      6              2429
+ 5 Dogfish Head Br… American … 90 Minut…           0.82      9              3206
+ 6 Stone Brewing C… American … Stone Ru…           0.81      7.7            2644
+ 7 Russian River B… American … Pliny Th…           0.8       8              2432
+ 8 Bell's Brewery,… American … Bell's H…           0.8      10              2347
+ 9 Sierra Nevada B… American … Sierra N…           0.79      7.2            2006
+10 Sierra Nevada B… American … Northern…           0.79      6.7            1308
+11 Stone Brewing C… Russian I… Stone Im…           0.78     10.5            2285
+12 Victory Brewing… American … HopDevil…           0.78      6.7            2239
+13 Stone Brewing C… American … Stone IP…           0.77      6.9              87
+14 Sierra Nevada B… American … Sierra N…           0.77      5.6            2526
+15 Sierra Nevada B… American … Sierra N…           0.77      6.7            1121
+16 Founders Brewin… American … Founders…           0.76      8.3            2443
+17 Sierra Nevada B… American … Sierra N…           0.76      5.9             977
+18 Founders Brewin… American … Founders…           0.76      7.2            1366
+19 Dogfish Head Br… American … 75 Minut…           0.76      7.5             139
+20 Dogfish Head Br… American … ApriHop             0.76      7              1469
+# ℹ 5 more variables: beer_rating &lt;dbl&gt;, brewery_popularity &lt;dbl&gt;,
+#   brewery_rating &lt;dbl&gt;, style_popularity &lt;dbl&gt;, style_rating &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recomended_beers |&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(beer_style) |&gt; slice(1) |&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(beer_style, style_popularity, style_rating) |&gt; View()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>No Lagers on top? Unexpected, to be honest. Everyone can handle a Lager, because its usual “averaged” beer with no extremes.<br>
+American IPA/APA seems the way to go.<br>
+I’m picking 3 different styles from 3 different breweries to continue the idea of averaging and finding just solid good beers to try:</p>
+<div class="cell column-page" data-hash="main_cache/html/question-two-cherrypicking_e3215922be82238cb21a485300016393">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>recomended_beers <span class="sc">|&gt;</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(beer_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Stone IPA (India Pale Ale)"</span>, </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"90 Minute IPA"</span>, </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sierra Nevada Pale Ale"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 11
+  brewery_name      beer_style beer_name weighted_score beer_abv beer_popularity
+  &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;           &lt;dbl&gt;
+1 Stone Brewing Co. American … Stone IP…           0.84      6.9            2526
+2 Dogfish Head Bre… American … 90 Minut…           0.82      9              3206
+3 Sierra Nevada Br… American … Sierra N…           0.77      5.6            2526
+# ℹ 5 more variables: beer_rating &lt;dbl&gt;, brewery_popularity &lt;dbl&gt;,
+#   brewery_rating &lt;dbl&gt;, style_popularity &lt;dbl&gt;, style_rating &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<section id="conclusion-4" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-4">Conclusion</h4>
+<p>All of those beers are from popular styles and good breweries. Raitings are also quite high.<br>
+One cool factor - all those breweries has all of those beer styles.<br>
+So, for example, you can freely swap to Stone Brewing Co.&nbsp;APA in cas your local bar doesn’t have Sierra Nevada Brewing Co.&nbsp;beers.</p>
+<p>As expected, I cant really validate the quality of my solution precisely.<br>
+So i’m just google some top-n craft beers to try and see if my dudes are in there!</p>
+<p><strong>Ways to improve</strong></p>
+<p>Add reviews_quality metric, tweak weights, 2 common + 1 rare beer recomendation.</p>
+</section>
+</section>
+<section id="which-of-the-factors-aroma-taste-appearance-palette-are-most-important-in-determining-the-overall-quality-of-a-beer" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="which-of-the-factors-aroma-taste-appearance-palette-are-most-important-in-determining-the-overall-quality-of-a-beer">3. Which of the factors (aroma, taste, appearance, palette) are most important in determining the overall quality of a beer?</h3>
+<p><strong>Possible approaches here are:</strong></p>
+<ul>
+<li>Correlation Analysis - Checks linear relationships</li>
+<li>Regression - More advanced linear model, that can estimate factor importance</li>
+<li>Decision tree models (RF or Gradient Boosting) - Feature importance for non-linear relationships</li>
+<li>Dimension reduction (PCA) - New features if data has many variables</li>
+</ul>
+<p>I already did Corr analysis in EDA - Step 3 - Multivariate analysis section.<br>
+Aroma and appearance are slightly less correlated with score, than Palate and Taste.</p>
+<p>But Taste and Palate have good signs of linear dependency. Meaning I can use linear regression to get more info.</p>
+<div class="cell column-page" data-hash="main_cache/html/question-three_1d7464251ad7d4269336a12c3f1847f5">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>regression_data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">select</span>(review_overall, review_aroma, review_appearance, review_palate, review_taste)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a linear model</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>regression <span class="ot">&lt;-</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(review_overall <span class="sc">~</span> review_aroma <span class="sc">+</span> review_appearance <span class="sc">+</span> review_palate <span class="sc">+</span> review_taste,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> regression_data</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="co"># R2</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(regression)<span class="sc">$</span>r.squared</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6545097</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating MSE</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>((<span class="fu">predict</span>(regression, regression_data) <span class="sc">-</span> regression_data<span class="sc">$</span>review_overall)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1779855</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Factors</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(regression) <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(term, estimate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+  term              estimate
+  &lt;chr&gt;                &lt;dbl&gt;
+1 (Intercept)           0.45
+2 review_aroma          0.05
+3 review_appearance     0.04
+4 review_palate         0.26
+5 review_taste          0.55</code></pre>
+</div>
+</div>
+<section id="conclusion-5" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-5">Conclusion</h4>
+<p>R2 = 65% meaning, more than half of the variance can be explained by factors in our model. Rest 35% may be random or unknown to our data factors.<br>
+Seems a good fit: we can trust the model results.<br>
+MSE = 0.18 meaning the model has the space for improvement (lower - the better).</p>
+<p>Coefficient for Taste = 0.55 meaning point in the taste score increases review score by 0.55 points. Meaning Taste is most important factor.<br>
+Palate is less, Aroma/Appearance are insignificant.</p>
+<p><strong>Ways to improve</strong></p>
+<p>There are more techniques to get a proper feature importance (how each factor contributes to the explained variance) out of regression.<br>
+MSE says there is a room to try different models.</p>
+</section>
+</section>
+<section id="if-i-typically-enjoy-a-beer-due-to-its-aroma-and-appearance-which-beer-style-should-i-try" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="if-i-typically-enjoy-a-beer-due-to-its-aroma-and-appearance-which-beer-style-should-i-try">4. If I typically enjoy a beer due to its aroma and appearance, which beer style should I try?</h3>
+<p><strong>Possible approaches here are:</strong></p>
+<ul>
+<li>Average scores - simple, gives idea of the styles with the highest average aroma/appearance ratings</li>
+<li>Correlations - to get an idea of relationships</li>
+<li>ML - same methods as in Question 2 to model complex relationships</li>
+<li>Clustering - groups similar styles by aroma / appearance ratings and find similar users</li>
+</ul>
+<p>Lets go with the simplest solution, since i’ve already used same approach before.</p>
+<div class="cell column-page" data-hash="main_cache/html/question-four_9e729f380cb31541c7e1ec3f30549938">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating factors</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_name) <span class="sc">%&gt;%</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">beer_aroma =</span> <span class="fu">mean</span>(review_aroma),</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">beer_appearance =</span> <span class="fu">mean</span>(review_appearance)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Min-max normalization to 0-1 scale</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">arap_consistency =</span> <span class="fu">abs</span>(beer_aroma <span class="sc">-</span> beer_appearance)) <span class="sc">|&gt;</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_style) <span class="sc">%&gt;%</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">style_aroma =</span> <span class="fu">mean</span>(beer_aroma),</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">style_appearance =</span> <span class="fu">mean</span>(beer_appearance),</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">style_arap_consistency =</span> <span class="fu">mean</span>(arap_consistency)</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>        style_aroma, style_appearance, style_arap_consistency</span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>      <span class="sc">~</span> (.x <span class="sc">-</span> <span class="fu">min</span>(.x)) <span class="sc">/</span> (<span class="fu">max</span>(.x) <span class="sc">-</span> <span class="fu">min</span>(.x)),</span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">.names =</span> <span class="st">"n_{.col}"</span></span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_style_arap_consistency =</span> <span class="dv">1</span> <span class="sc">-</span> n_style_arap_consistency) <span class="co"># fix lower is better</span></span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-33"><a href="#cb44-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Weighted score for each beer</span></span>
+<span id="cb44-34"><a href="#cb44-34" aria-hidden="true" tabindex="-1"></a>recomended_arap_beers <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb44-35"><a href="#cb44-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(beer_style) <span class="sc">|&gt;</span></span>
+<span id="cb44-36"><a href="#cb44-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-37"><a href="#cb44-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb44-38"><a href="#cb44-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
+<span id="cb44-39"><a href="#cb44-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-40"><a href="#cb44-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">weighted_score =</span> <span class="fu">sum</span>(</span>
+<span id="cb44-41"><a href="#cb44-41" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c_across</span>(<span class="fu">starts_with</span>(<span class="st">"n_style"</span>)) <span class="sc">*</span></span>
+<span id="cb44-42"><a href="#cb44-42" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">0</span>, <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="fl">0.1</span>)</span>
+<span id="cb44-43"><a href="#cb44-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb44-44"><a href="#cb44-44" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb44-45"><a href="#cb44-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb44-46"><a href="#cb44-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>weighted_score) <span class="sc">%&gt;%</span></span>
+<span id="cb44-47"><a href="#cb44-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb44-48"><a href="#cb44-48" aria-hidden="true" tabindex="-1"></a>    beer_style, weighted_score,</span>
+<span id="cb44-49"><a href="#cb44-49" aria-hidden="true" tabindex="-1"></a>    style_aroma, style_appearance,</span>
+<span id="cb44-50"><a href="#cb44-50" aria-hidden="true" tabindex="-1"></a>    style_rating, style_popularity, style_arap_consistency</span>
+<span id="cb44-51"><a href="#cb44-51" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb44-52"><a href="#cb44-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-53"><a href="#cb44-53" aria-hidden="true" tabindex="-1"></a>recomended_arap_beers <span class="sc">|&gt;</span></span>
+<span id="cb44-54"><a href="#cb44-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb44-55"><a href="#cb44-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 7
+   beer_style           weighted_score style_aroma style_appearance style_rating
+   &lt;chr&gt;                         &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;        &lt;dbl&gt;
+ 1 American Double / I…           0.92        4.1              4.08         4   
+ 2 American Double / I…           0.91        4.16             4.16         4.03
+ 3 Russian Imperial St…           0.91        4.08             4.21         4.02
+ 4 Quadrupel (Quad)               0.89        4.13             4.12         4.07
+ 5 American IPA                   0.88        3.9              3.97         3.97
+ 6 American Barleywine            0.85        4.02             4.04         3.9 
+ 7 Belgian Strong Dark…           0.84        3.97             4            3.91
+ 8 Gueuze                         0.84        4.12             4.04         4.09
+ 9 Weizenbock                     0.84        4.05             4.01         4.01
+10 American Wild Ale              0.84        4.13             4.01         4.1 
+# ℹ 2 more variables: style_popularity &lt;dbl&gt;, style_arap_consistency &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<section id="conclusion-6" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-6">Conclusion</h4>
+<p>So, American Double / Imperial IPA is the winner here. High scores in both Aroma and Appearance, popular style.</p>
+<p><strong>Ways to improve</strong></p>
+<p>Dunno</p>
+</section>
+</section>
+<section id="use-bootstrapping-to-investigate-if-there-is-seasonality-in-the-overall-ratings." class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="use-bootstrapping-to-investigate-if-there-is-seasonality-in-the-overall-ratings.">5. Use bootstrapping to investigate if there is seasonality in the overall ratings.</h3>
+<p><strong>Possible approaches here are:</strong></p>
+<ul>
+<li>Seasonal Decomposition - gets trend, seasonality, and residuals components + BT for CI for the seasonal component.</li>
+<li>Fourier analysis - converts time series data to frequencies and gets multiple seasonal patterns. Complex and hard to interpret.</li>
+<li>SARIMA modeling - to get seasoning patterns and forecast trends. Complicated and not compatible with BT</li>
+<li>Statistical Tests - Ljung-Box test or Chi-Squared test (not sure). Gives p-Value, very simple.</li>
+</ul>
+<p>Decomposition is simple to implement and easy to visualize and understand.</p>
+<section id="seasonal-decomposition" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="seasonal-decomposition">Seasonal decomposition</h4>
+<div class="cell page-columns page-full" data-hash="main_cache/html/question-five-decomposition_a9d22e45005e1e2ac69bb781f23317d3">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reloading to fix missing data</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>seasoning <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"beer_reviews.csv"</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Cutting old data</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>seasoning <span class="ot">&lt;-</span> seasoning <span class="sc">|&gt;</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(review_overall <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_time =</span> <span class="fu">ymd_hms</span>(<span class="fu">as_datetime</span>(review_time)),</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">month =</span> <span class="fu">floor_date</span>(review_time, <span class="st">"month"</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">&gt;=</span> <span class="fu">ymd</span>(<span class="st">"2002-01-01"</span>), month <span class="sc">&lt;</span> <span class="fu">ymd</span>(<span class="st">"2012-01-01"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(review_time, month, review_overall) <span class="sc">|&gt;</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">as.Date</span>(month))</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="co"># seasoning |&gt; write_csv("seasoning.csv")</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Monthly average</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>monthly_ratings <span class="ot">&lt;-</span> seasoning <span class="sc">%&gt;%</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(month) <span class="sc">%&gt;%</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_overall =</span> <span class="fu">mean</span>(review_overall),</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_quantity =</span> <span class="fu">n</span>()</span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STL decomposition</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>stl_result <span class="ot">&lt;-</span> <span class="fu">stl</span>(</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ts</span>(</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>    monthly_ratings<span class="sc">$</span>review_overall,</span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">frequency =</span> <span class="dv">12</span>,</span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> <span class="fu">c</span>(</span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">year</span>(<span class="fu">min</span>(monthly_ratings<span class="sc">$</span>month)),</span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">month</span>(<span class="fu">min</span>(monthly_ratings<span class="sc">$</span>month))</span>
+<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-34"><a href="#cb46-34" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb46-35"><a href="#cb46-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">s.window =</span> <span class="st">"periodic"</span></span>
+<span id="cb46-36"><a href="#cb46-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb46-37"><a href="#cb46-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-38"><a href="#cb46-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot STL components</span></span>
+<span id="cb46-39"><a href="#cb46-39" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(stl_result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/question-five-decomposition-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ljung-Box test for seasonality</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Box.test</span>(stl_result<span class="sc">$</span>time.series[, <span class="st">"remainder"</span>], <span class="at">lag =</span> <span class="dv">12</span>, <span class="at">type =</span> <span class="st">"Ljung-Box"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Box-Ljung test
+
+data:  stl_result$time.series[, "remainder"]
+X-squared = 21.737, df = 12, p-value = 0.04058</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Average seasonal effect for each month</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>monthly_data <span class="ot">&lt;-</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    monthly_ratings,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(stl_result<span class="sc">$</span>time.series)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">month_name =</span> lubridate<span class="sc">::</span><span class="fu">month</span>(month, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>monthly_data <span class="sc">|&gt;</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(month_name) <span class="sc">|&gt;</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">sum</span>(review_quantity),</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mean</span>(seasonal),</span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(seasonal)</span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> month_name, <span class="at">y =</span> mean)) <span class="sc">+</span></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">group =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Over 12 Months"</span>,</span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Month"</span>,</span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Seasonal Effect"</span></span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-page">
+<p><img src="main_files/figure-html/question-five-decomposition-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co"># View()</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># profiling_num() |&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># mutate_if(is.numeric, ~ round(., 3))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There is a seasonal cycle, but small: from -0.02 in August to 0.02 in January.<br>
+The remainder component is the data that can’t be explained by the trend + seasonal components.<br>
+It’s centered around zero, which is a good sign. Means that the decomposition has effectively captured the trend and seasonality, leaving behind mostly noise.<br>
+At the left side - there is more noise, because of less users - so the reviews are more subjective.<br>
+Ljung-Box test is looking for a significant autocorrelation in remaining unexplained component. p-value = 0.04 means there is still significant seasoning component inside noise.</p>
+</section>
+<section id="bootstrap-failed-attempt" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="bootstrap-failed-attempt">Bootstrap (failed attempt)</h4>
+<div class="cell column-page">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Bootstrap function to resample the seasonal component</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>bootstrap_seasonal <span class="ot">&lt;-</span> <span class="cf">function</span>(data, indices) {</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  sample_data <span class="ot">&lt;-</span> data[indices, ]</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  stl_bootstrap <span class="ot">&lt;-</span> <span class="fu">stl</span>(<span class="fu">ts</span>(sample_data<span class="sc">$</span>review_overall, <span class="at">frequency =</span> <span class="dv">12</span>), <span class="at">s.window =</span> <span class="st">"periodic"</span>)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stl_bootstrap<span class="sc">$</span>time.series[, <span class="st">"seasonal"</span>])</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the bootstrap function</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>) <span class="co"># Set seed for reproducibility</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>boot_results <span class="ot">&lt;-</span> <span class="fu">boot</span>(</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> monthly_ratings,</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> bootstrap_seasonal,</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">10000</span> <span class="co"># Number of bootstrap resamples</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the confidence intervals</span></span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Says, the seasonal effect for the whole dataset lies there</span></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a><span class="fu">boot.ci</span>(boot_results, <span class="at">type =</span> <span class="st">"perc"</span>, <span class="at">conf =</span> <span class="fl">0.95</span>)</span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a>boot_intervals <span class="ot">&lt;-</span></span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a>  boot_results<span class="sc">$</span>t <span class="sc">|&gt;</span></span>
+<span id="cb51-28"><a href="#cb51-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb51-29"><a href="#cb51-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-30"><a href="#cb51-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">profiling_num</span>() <span class="sc">|&gt;</span></span>
+<span id="cb51-31"><a href="#cb51-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">5</span>))</span>
+<span id="cb51-32"><a href="#cb51-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-33"><a href="#cb51-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-34"><a href="#cb51-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-35"><a href="#cb51-35" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_all</span>(<span class="fu">list</span>(<span class="sc">~</span> <span class="fu">mean</span>(.), <span class="sc">~</span> <span class="fu">quantile</span>(., <span class="fl">0.025</span>), <span class="sc">~</span> <span class="fu">quantile</span>(., <span class="fl">0.0975</span>))) <span class="sc">|&gt;</span> <span class="fu">t</span>()</span>
+<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-37"><a href="#cb51-37" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb51-38"><a href="#cb51-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> boot_intervals[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, ],</span>
+<span id="cb51-39"><a href="#cb51-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI_lower =</span> boot_intervals[<span class="dv">13</span><span class="sc">:</span><span class="dv">24</span>, ],</span>
+<span id="cb51-40"><a href="#cb51-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI_upper =</span> boot_intervals[<span class="dv">25</span><span class="sc">:</span><span class="dv">36</span>, ]</span>
+<span id="cb51-41"><a href="#cb51-41" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb51-42"><a href="#cb51-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">5</span>))</span>
+<span id="cb51-43"><a href="#cb51-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-44"><a href="#cb51-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-45"><a href="#cb51-45" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> month_name, <span class="at">y =</span> mean)) <span class="sc">+</span></span>
+<span id="cb51-46"><a href="#cb51-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">group =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb51-47"><a href="#cb51-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb51-48"><a href="#cb51-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb51-49"><a href="#cb51-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Over 12 Months"</span>,</span>
+<span id="cb51-50"><a href="#cb51-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Month"</span>,</span>
+<span id="cb51-51"><a href="#cb51-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Seasonal Effect"</span></span>
+<span id="cb51-52"><a href="#cb51-52" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb51-53"><a href="#cb51-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-54"><a href="#cb51-54" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb51-55"><a href="#cb51-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-56"><a href="#cb51-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-57"><a href="#cb51-57" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">resamples =</span> <span class="fu">round</span>(boot_results<span class="sc">$</span>t, <span class="dv">5</span>)[<span class="dv">1</span>, ]) <span class="sc">|&gt;</span></span>
+<span id="cb51-58"><a href="#cb51-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> resamples)) <span class="sc">+</span></span>
+<span id="cb51-59"><a href="#cb51-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="fl">0.001</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb51-60"><a href="#cb51-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb51-61"><a href="#cb51-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Resamples of January Seasonal Component"</span>,</span>
+<span id="cb51-62"><a href="#cb51-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Seasonal Component Value"</span>,</span>
+<span id="cb51-63"><a href="#cb51-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span></span>
+<span id="cb51-64"><a href="#cb51-64" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb51-65"><a href="#cb51-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Looks loke bootstrap lost some time-series specific relationship, so it just says the things that I already know.<br>
+Seasoning is within (-0.0253, 0.0233 ) interval.<br>
+But I want to get something like that:<br>
+month seasoning_component lower upper<br>
+Jan 0.02 0.019 0.021<br>
+Feb 0.017 0.015 0.020</p>
+<div class="cell column-page">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># monthly specific CI</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extracting individual confidence intervals for each month</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>boot_intervals <span class="ot">&lt;-</span> </span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>(<span class="fu">apply</span>(boot_results<span class="sc">$</span>t, <span class="dv">2</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    ci <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))  <span class="co"># 95% confidence interval</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(ci)</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert boot_intervals into a data frame for easier handling</span></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>boot_intervals <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(boot_intervals)</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(boot_intervals) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Lower"</span>, <span class="st">"Upper"</span>)</span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the confidence intervals for each month</span></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(boot_intervals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="block-bootstrap" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="block-bootstrap">Block bootstrap</h4>
+<div class="cell column-page" data-hash="main_cache/html/question-five-block-bootstrap_9e0223085737d99a403c587760193f2d">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Block bootstrap with STL</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>bootstrap_block <span class="ot">&lt;-</span> <span class="cf">function</span>(data, indices) {</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  sample <span class="ot">&lt;-</span> data[indices, ]</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  monthly_avg <span class="ot">&lt;-</span> sample <span class="sc">%&gt;%</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(month) <span class="sc">%&gt;%</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">average_rating =</span> <span class="fu">mean</span>(review_overall, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  stl <span class="ot">&lt;-</span> <span class="fu">stl</span>(<span class="fu">ts</span>(monthly_avg<span class="sc">$</span>average_rating, <span class="at">frequency =</span> <span class="dv">12</span>), <span class="at">s.window =</span> <span class="st">"periodic"</span>)</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stl<span class="sc">$</span>time.series[, <span class="st">"seasonal"</span>])</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Performing block bootstrap</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">boot</span>(<span class="at">data =</span> seasoning, <span class="at">statistic =</span> bootstrap_block, <span class="at">R =</span> <span class="dv">1000</span>, <span class="at">sim =</span> <span class="st">"ordinary"</span>, <span class="at">stype =</span> <span class="st">"i"</span>)</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>bootstrapping_intervals <span class="ot">&lt;-</span></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>    monthly_data <span class="sc">|&gt;</span> <span class="fu">group_by</span>(month_name) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">review_overall =</span> <span class="fu">mean</span>(review_overall),</span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">review_quantity =</span> <span class="fu">sum</span>(review_quantity),</span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">seasonal =</span> <span class="fu">mean</span>(seasonal),</span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">trend =</span> <span class="fu">mean</span>(trend),</span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">remainder =</span> <span class="fu">mean</span>(remainder)</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">apply</span>(</span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">t</span>(results<span class="sc">$</span>t)[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, ],</span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1</span>,</span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>      quantile,</span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>)</span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">3</span>) <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">3</span>))</span>
+<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>bootstrapping_intervals <span class="sc">|&gt;</span> </span>
+<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(month_name, review_overall, seasonal, <span class="st">'2.5%'</span>, <span class="st">'97.5%'</span>, trend)</span>
+<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a><span class="co"># bootstrapping_intervals |&gt; write_csv("bootstrapping_intervals.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Even with 1k samples, confidence intervals are not so wide. And the trend is visually visible.</p>
+<div class="cell column-page" data-hash="main_cache/html/question-five-block-bootstrap-plots_5c2efa8e2aaeb7c89204715f0b038889">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Error bars</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>bootstrapping_intervals <span class="sc">%&gt;%</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(month_name, seasonal, <span class="st">`</span><span class="at">2.5%</span><span class="st">`</span>, <span class="st">`</span><span class="at">97.5%</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">month =</span> month_name, <span class="at">lower =</span> <span class="st">`</span><span class="at">2.5%</span><span class="st">`</span>, <span class="at">upper =</span> <span class="st">`</span><span class="at">97.5%</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> month, <span class="at">y =</span> seasonal, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_pointrange</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper),</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"darkcyan"</span>,</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="fl">0.1</span>,</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fatten =</span> <span class="dv">4</span>,</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Seasonal component with 95% confidence"</span>,</span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Value"</span>,</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Month"</span></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Ribbon</span></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>bootstrapping_intervals <span class="sc">%&gt;%</span></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(month_name, seasonal, <span class="st">`</span><span class="at">2.5%</span><span class="st">`</span>, <span class="st">`</span><span class="at">97.5%</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">month =</span> month_name, <span class="at">lower =</span> <span class="st">`</span><span class="at">2.5%</span><span class="st">`</span>, <span class="at">upper =</span> <span class="st">`</span><span class="at">97.5%</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> month, <span class="at">y =</span> seasonal, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Seasonal Trend with Confidence Intervals"</span>,</span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Value"</span>,</span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Month"</span></span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="conclusion-7" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-7">Conclusion</h4>
+<p>Bootstrappung under time-series data is tricky.<br>
+There is small, but solid seasoning 12 month cycles in data within -0.02 to 0.02 range.<br>
+With the top peak at Jan, and bot at Aug.</p>
+<p><strong>Ways to improve</strong></p>
+<p>Mathematically estimate STL quality: Calculate the proportion of the total variance explained by the seasonal and trend components.<br>
+Analyze the residuals for autocorrelation, white noise, etc.</p>
+<p>Segmentation might be a way</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
